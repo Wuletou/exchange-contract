@@ -1,4 +1,4 @@
-#include <exchange/exchange_state.hpp>
+#include "exchange_state.hpp"
 
 namespace eosio {
    extended_asset exchange_state::convert_to_exchange( connector& c, extended_asset in ) {

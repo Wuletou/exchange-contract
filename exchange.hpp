@@ -2,7 +2,7 @@
 #include <eosiolib/currency.hpp>
 #include <boost/container/flat_map.hpp>
 #include <cmath>
-#include <exchange/market_state.hpp>
+#include "market_state.hpp"
 
 namespace eosio {
 

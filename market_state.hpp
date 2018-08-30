@@ -1,6 +1,6 @@
 #pragma once
-#include <exchange/exchange_state.hpp>
-#include <exchange/exchange_accounts.hpp>
+#include "exchange_state.hpp"
+#include "exchange_accounts.hpp"
 
 namespace eosio {
 
