@@ -1,6 +1,10 @@
 #include <math.h>
 #include "exchange.hpp"
 
+#include "exchange_state.cpp"
+#include "exchange_accounts.cpp"
+#include "market_state.cpp"
+
 #include <eosiolib/dispatcher.hpp>
 
 namespace eosio {
