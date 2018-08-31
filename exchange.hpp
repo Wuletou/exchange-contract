@@ -73,8 +73,6 @@ namespace eosio {
             symbol_type     market;
             extended_asset  sell;
             extended_asset  min_receive;
-            uint32_t        expire = 0;
-            uint8_t         fill_or_kill = true;
          };
 
          void on( const trade& t    );

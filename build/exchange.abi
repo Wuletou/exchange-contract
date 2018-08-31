@@ -68,8 +68,6 @@
         {"name":"market", "type":"symbol"},
         {"name":"sell", "type":"extended_asset"},
         {"name":"min_receive", "type":"extended_asset"},
-        {"name":"expire", "type":"uint32"},
-        {"name":"fill_or_kill", "type":"uint8"}
       ]
     },
     {
