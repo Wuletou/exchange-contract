@@ -23,51 +23,13 @@
       ]
     },
     {
-      "name": "upmargin",
-      "base": "",
-      "fields": [
-        {"name":"borrower",         "type":"account_name"},
-        {"name":"market",           "type":"symbol"},
-        {"name":"delta_borrow",     "type":"extended_asset"},
-        {"name":"delta_collateral", "type":"extended_asset"}
-      ]
-    },
-    {
-      "name": "covermargin",
-      "base": "",
-      "fields": [
-        {"name":"borrower",         "type":"account_name"},
-        {"name":"market",           "type":"symbol"},
-        {"name":"cover_amount",     "type":"extended_asset"}
-      ]
-    },
-    {
-      "name": "lend",
-      "base": "",
-      "fields": [
-        {"name":"lender", "type":"account_name"},
-        {"name":"market", "type":"symbol"},
-        {"name":"quantity", "type":"extended_asset"}
-      ]
-    },
-    {
-      "name": "unlend",
-      "base": "",
-      "fields": [
-        {"name":"lender", "type":"account_name"},
-        {"name":"market", "type":"symbol"},
-        {"name":"interest_shares", "type":"float64"},
-        {"name":"interest_symbol", "type":"extended_symbol"}
-      ]
-    },
-    {
       "name": "trade",
       "base": "",
       "fields": [
         {"name":"seller", "type":"account_name"},
         {"name":"market", "type":"symbol"},
         {"name":"sell", "type":"extended_asset"},
-        {"name":"min_receive", "type":"extended_asset"},
+        {"name":"receive", "type":"extended_asset"},
       ]
     },
     {
@@ -75,8 +37,6 @@
       "base": "",
       "fields": [
         {"name":"creator", "type":"account_name"},
-        {"name":"initial_supply", "type":"asset"},
-        {"name":"fee", "type":"uint32"},
         {"name":"base_deposit", "type":"extended_asset"},
         {"name":"quote_deposit", "type":"extended_asset"}
       ]
@@ -147,10 +107,6 @@
     { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
     { "name": "issue", "type": "issue", "ricardian_contract": "" },
-    { "name": "lend", "type": "lend", "ricardian_contract": "" },
-    { "name": "unlend", "type": "unlend", "ricardian_contract": "" },
-    { "name": "upmargin", "type": "upmargin", "ricardian_contract": "" },
-    { "name": "covermargin", "type": "covermargin", "ricardian_contract": "" },
     { "name": "create", "type": "create", "ricardian_contract": "" }
   ],
   "tables": [{
