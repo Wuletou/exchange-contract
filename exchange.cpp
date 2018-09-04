@@ -22,50 +22,93 @@ namespace eosio {
       currency::inline_transfer( _this_contract, from, quantity, "withdraw" );
    }
 
+   extended_asset min_asset(extended_asset a, extended_asset b) {
+      return a < b ? a : b;
+   }
+
    void exchange::on( const trade& t ) {
       require_auth( t.seller );
       eosio_assert( t.sell.is_valid(), "invalid sell amount" );
-      eosio_assert( t.sell.amount > 0, "sell amount must be positive" );
       eosio_assert( t.receive.is_valid(), "invalid receive amount" );
-      eosio_assert( t.receive.amount >= 0, "receive amount cannot be negative" );
+      eosio_assert( t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid conversion" );
 
-      auto receive_symbol = t.receive.get_extended_symbol();
-      eosio_assert( t.sell.get_extended_symbol() != receive_symbol, "invalid conversion" );
+      markets exstates( _this_contract, _this_contract );
+      for (auto exstate : exstates.get_index<N(byquoterate)>()) {
+         print(
+                 name{exstate.manager}, ' ',
+                 (asset) exstate.base, "->",
+                 (asset) exstate.quote, ' ',
+                 exstate.quote_rate(), '\n'
+         );
+      }
+
+      if (t.sell.amount == 0) {
+         eosio_assert( t.receive.amount > 0, "receive amount must be positive" );
+         // market order: get X receive (base) for any sell (quote)
+         extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset received = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset estimated_to_receive;
+         for (auto ex : exstates.get_index<N(byquoterate)>()) {
+            estimated_to_receive = t.receive - received;
+            auto min = min_asset(ex.base, estimated_to_receive);
+            received += min;
+            extended_asset output = ex.convert(min, ex.quote.get_extended_symbol());
+
+            if (min == ex.base ) {
+               exstates.erase(ex);
+            } else if (min < ex.base) {
+               exstates.modify(ex, _this_contract, [&]( auto& s ) {
+                  s.base -= min;
+                  s.quote += output;
+               });
+               break;
+            } else {
+               eosio_assert( false, "incorrect state" ); // todo: remove
+            }
+
+            _accounts.adjust_balance( ex.manager, -min, "sold" );
+            _accounts.adjust_balance( ex.manager, output, "receive" );
+         }
+
+         eosio_assert( received == t.receive, "unable to fill");
+
+         _accounts.adjust_balance( t.seller, -sold, "sold" );
+         _accounts.adjust_balance( t.seller, received, "received" );
+      } else if (t.receive.amount == 0) {
+         eosio_assert( t.sell.amount > 0, "sell amount must be positive" );
+         // limit order: get maximum receive (base) for X sell (quote)
+         extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset received = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset estimated_to_sold;
+         for (auto ex : exstates.get_index<N(byquoterate)>()) {
+            estimated_to_sold = t.sell - sold;
+            auto min = min_asset(ex.quote, estimated_to_sold);
+            sold += min;
+            extended_asset output = ex.convert(min, ex.quote.get_extended_symbol());
+
+            if (min == ex.quote ) {
+                exstates.erase(ex);
+            } else if (min < ex.quote) {
+                exstates.modify(ex, _this_contract, [&]( auto& s ) {
+                    s.base -= output;
+                    s.quote += min;
+                });
+                break;
+            } else {
+                eosio_assert( false, "incorrect state" ); // todo: remove
+            }
+
+            _accounts.adjust_balance( ex.manager, -min, "sold" );
+            _accounts.adjust_balance( ex.manager, output, "receive" );
+         }
+
+         eosio_assert( sold == t.sell, "unable to fill");
+
+         _accounts.adjust_balance( t.seller, -sold, "sold" );
+         _accounts.adjust_balance( t.seller, received, "received" );
+      }
+
       // todo: check that sender's balance is enough
-
-      market_state market( _this_contract, t.market, _accounts );
-
-      auto temp   = market.exstate;
-      auto output = temp.convert( t.sell, receive_symbol );
-
-      while( temp.requires_margin_call() ) {
-         market.margin_call( receive_symbol );
-         temp = market.exstate;
-         output = temp.convert( t.sell, receive_symbol );
-      }
-      market.exstate = temp;
-
-      print( name{t.seller}, "   ", t.sell, "  =>  ", output, "\n" );
-
-      if( t.receive.amount != 0 ) {
-         eosio_assert( t.receive.amount <= output.amount, "unable to fill" );
-      }
-
-      _accounts.adjust_balance( t.seller, -t.sell, "sold" );
-      _accounts.adjust_balance( t.seller, output, "received" );
-
-      if( market.exstate.supply.amount != market.initial_state().supply.amount ) {
-         auto delta = market.exstate.supply - market.initial_state().supply;
-
-         _excurrencies.issue_currency( { .to = _this_contract,
-                                               .quantity = delta,
-                                               .memo = string("") } );
-      }
-
-      /// TODO: if pending order start deferred trx to fill it
-
-      market.save();
-
    }
 
    void exchange::createx( account_name    creator,

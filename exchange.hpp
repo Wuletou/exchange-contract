@@ -29,14 +29,13 @@ namespace eosio {
 
          struct trade {
             account_name    seller;
-            symbol_type     market;
             extended_asset  sell;
             extended_asset  receive;
          };
 
          void on( const trade& t    );
          void on( const currency::transfer& t, account_name code );
-
          void apply( account_name contract, account_name act );
+         extended_asset convert( extended_asset from, extended_symbol to ) const;
    };
 } // namespace eosio
