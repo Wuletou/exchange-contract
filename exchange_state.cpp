@@ -20,4 +20,15 @@ namespace eosio {
       return out;
    }
 
+   void exchange_state::print() const {
+      eosio::print(
+         name{manager}, ' ',
+         (asset) base, "->",
+         (asset) quote, ' ',
+         base_rate(), ' ',
+         quote_rate(), ' ',
+         primary_key(), '\n'
+      );
+   }
+
 } /// namespace eosio

@@ -10,8 +10,11 @@ namespace eosio {
       extended_asset base;
       extended_asset quote;
 
+      static uint64_t create_primary_key( exchange_state ex ) {
+          return ex.manager + ex.base.symbol.name() + ex.quote.symbol.name() + ex.base_rate() * POW10(15);
+      }
       static uint64_t create_primary_key( account_name manager, extended_asset base, extended_asset quote ) {
-         return manager + base.symbol.name() + quote.symbol.name() + base.amount * 1. / quote.amount * POW10(15);
+          return create_primary_key(exchange_state{manager, base, quote});
       }
       uint64_t primary_key() const { return create_primary_key(manager, base, quote); }
 
@@ -25,6 +28,7 @@ namespace eosio {
 //      extended_asset convert_to_exchange( connector& c, extended_asset in );
 //      extended_asset convert_from_exchange( connector& c, extended_asset in );
       extended_asset convert( extended_asset from, extended_symbol to_symbol );
+      void print() const;
 
       EOSLIB_SERIALIZE( exchange_state, (manager)(base)(quote) )
    };

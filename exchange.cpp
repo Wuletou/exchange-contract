@@ -34,30 +34,27 @@ namespace eosio {
 
       markets exstates( _this_contract, _this_contract );
       for (auto exstate : exstates.get_index<N(byquoterate)>()) {
-         print(
-                 name{exstate.manager}, ' ',
-                 (asset) exstate.base, "->",
-                 (asset) exstate.quote, ' ',
-                 exstate.quote_rate(), '\n'
-         );
+         exstate.print();
       }
 
+      auto indexed_exstates = exstates.get_index<N(byquoterate)>();
       if (t.sell.amount == 0) {
          eosio_assert( t.receive.amount > 0, "receive amount must be positive" );
          // market order: get X receive (base) for any sell (quote)
          extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
-         extended_asset received = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
          extended_asset estimated_to_receive;
-         for (auto ex : exstates.get_index<N(byquoterate)>()) {
+         for (auto ex_itr = indexed_exstates.cbegin(); ex_itr != indexed_exstates.cend(); ex_itr++) {
+            auto ex = *ex_itr;
             estimated_to_receive = t.receive - received;
             auto min = min_asset(ex.base, estimated_to_receive);
             received += min;
             extended_asset output = ex.convert(min, ex.quote.get_extended_symbol());
 
             if (min == ex.base ) {
-               exstates.erase(ex);
+               indexed_exstates.erase(ex_itr);
             } else if (min < ex.base) {
-               exstates.modify(ex, _this_contract, [&]( auto& s ) {
+               indexed_exstates.modify(ex_itr, _this_contract, [&]( auto& s ) {
                   s.base -= min;
                   s.quote += output;
                });
@@ -80,16 +77,17 @@ namespace eosio {
          extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
          extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
          extended_asset estimated_to_sold;
-         for (auto ex : exstates.get_index<N(byquoterate)>()) {
+         for (auto ex_itr = indexed_exstates.cbegin(); ex_itr != indexed_exstates.cend(); ex_itr++) {
+            auto ex = *ex_itr;
             estimated_to_sold = t.sell - sold;
             auto min = min_asset(ex.quote, estimated_to_sold);
             sold += min;
             extended_asset output = ex.convert(min, ex.base.get_extended_symbol());
 
             if (min == ex.quote ) {
-                exstates.erase(ex);
+               indexed_exstates.erase(ex_itr);
             } else if (min < ex.quote) {
-                exstates.modify(ex, _this_contract, [&]( auto& s ) {
+               indexed_exstates.modify( ex_itr, _this_contract, [&]( auto& s ) {
                     s.base -= output;
                     s.quote += min;
                 });
