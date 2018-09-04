@@ -30,7 +30,7 @@ namespace eosio {
       require_auth( t.seller );
       eosio_assert( t.sell.is_valid(), "invalid sell amount" );
       eosio_assert( t.receive.is_valid(), "invalid receive amount" );
-      eosio_assert( t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid conversion" );
+      eosio_assert( t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid exchange" );
 
       markets exstates( _this_contract, _this_contract );
       for (auto exstate : exstates.get_index<N(byquoterate)>()) {
@@ -78,13 +78,13 @@ namespace eosio {
          eosio_assert( t.sell.amount > 0, "sell amount must be positive" );
          // limit order: get maximum receive (base) for X sell (quote)
          extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
-         extended_asset received = extended_asset(0, t.sell.get_extended_symbol());
+         extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
          extended_asset estimated_to_sold;
          for (auto ex : exstates.get_index<N(byquoterate)>()) {
             estimated_to_sold = t.sell - sold;
             auto min = min_asset(ex.quote, estimated_to_sold);
             sold += min;
-            extended_asset output = ex.convert(min, ex.quote.get_extended_symbol());
+            extended_asset output = ex.convert(min, ex.base.get_extended_symbol());
 
             if (min == ex.quote ) {
                 exstates.erase(ex);
