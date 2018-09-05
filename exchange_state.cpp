@@ -27,7 +27,7 @@ namespace eosio {
          (asset) quote, ' ',
          get_price(), ' ',
          get_rprice(), ' ',
-         primary_key(), '\n'
+         primary_key()
       );
    }
 
