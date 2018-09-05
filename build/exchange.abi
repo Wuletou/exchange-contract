@@ -97,6 +97,15 @@
         {"name":"currency", "type":"uint64"},
         {"name":"supply", "type":"uint64"}
       ]
+    },{
+      "name": "exchange_state",
+      "base": "",
+      "fields": [
+        {"name": "manager", "type": "name"},
+        {"name": "base", "type": "extended_asset"},
+        {"name": "quote", "type": "extended_asset"},
+        {"name": "price", "type": "float64"}
+      ]
     }
   ],
   "actions": [
@@ -120,6 +129,12 @@
       "index_type": "i64",
       "key_names" : ["currency"],
       "key_types" : ["uint64"]
+    },{
+      "name": "markets",
+      "index_type": "i64",
+      "key_names": ["pk_value"],
+      "key_types": ["name"],
+      "type": "exchange_state"
     }
   ],
   "ricardian_clauses": [],

@@ -9,7 +9,7 @@ namespace eosio {
       account_name   manager;
       extended_asset base;
       extended_asset quote;
-      long double    price;
+      double         price;
 
       exchange_state() { }
 
@@ -17,14 +17,14 @@ namespace eosio {
          this->manager = manager;
          this->base = base;
          this->quote = quote;
-         this->price = (long double) base.amount / quote.amount;
+         this->price = (double) base.amount / quote.amount;
       }
 
       uint64_t primary_key() const { return manager + base.symbol.name() + quote.symbol.name() + price * POW10(15); }
 
       account_name get_manager() const { return manager; };
-      long double get_price() const { return price; }
-      long double get_rprice() const { return 1 / price; }
+      double get_price() const { return price; }
+      double get_rprice() const { return 1 / price; }
 
       extended_asset convert( extended_asset from, extended_symbol to_symbol );
       void print() const;
@@ -33,8 +33,8 @@ namespace eosio {
    };
 
    typedef eosio::multi_index<N(markets), exchange_state,
-      indexed_by< N(byprice),  const_mem_fun< exchange_state, long double, &exchange_state::get_price > >,
-      indexed_by< N(byrprice), const_mem_fun< exchange_state, long double, &exchange_state::get_rprice > >,
+      indexed_by< N(byprice),  const_mem_fun< exchange_state, double, &exchange_state::get_price > >,
+      indexed_by< N(byrprice), const_mem_fun< exchange_state, double, &exchange_state::get_rprice > >,
       indexed_by< N(bymanager),const_mem_fun< exchange_state, account_name, &exchange_state::get_manager > >
    > markets;
 
