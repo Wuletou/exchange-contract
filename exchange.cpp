@@ -32,39 +32,43 @@ namespace eosio {
       eosio_assert( t.receive.is_valid(), "invalid receive amount" );
       eosio_assert( t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid exchange" );
 
-      markets exstates( _this_contract, _this_contract );
-      for (auto exstate : exstates.get_index<N(byquoterate)>()) {
-         exstate.print();
-      }
+      markets orders( _this_contract, _this_contract );
+      auto sorted_orders = orders.get_index<N(byprice)>();
 
-      auto indexed_exstates = exstates.get_index<N(byquoterate)>();
       if (t.sell.amount == 0) {
          eosio_assert( t.receive.amount > 0, "receive amount must be positive" );
          // market order: get X receive (base) for any sell (quote)
          extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
          extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
          extended_asset estimated_to_receive;
-         for (auto ex_itr = indexed_exstates.cbegin(); ex_itr != indexed_exstates.cend(); ex_itr++) {
-            auto ex = *ex_itr;
-            estimated_to_receive = t.receive - received;
-            auto min = min_asset(ex.base, estimated_to_receive);
-            received += min;
-            extended_asset output = ex.convert(min, ex.quote.get_extended_symbol());
 
-            if (min == ex.base ) {
-               indexed_exstates.erase(ex_itr);
-            } else if (min < ex.base) {
-               indexed_exstates.modify(ex_itr, _this_contract, [&]( auto& s ) {
+         auto order_itr = sorted_orders.cbegin();
+         while (order_itr != sorted_orders.cend()) {
+            auto order = *order_itr;
+            if (order.manager == t.seller) {
+               order_itr++;
+               continue;
+            }
+            estimated_to_receive = t.receive - received;
+            auto min = min_asset(order.base, estimated_to_receive);
+            received += min;
+            extended_asset output = order.convert(min, order.quote.get_extended_symbol());
+            sold += output;
+
+            if (min == order.base ) {
+               order_itr = sorted_orders.erase(order_itr);
+            } else if (min < order.base) {
+               sorted_orders.modify(order_itr, _this_contract, [&]( auto& s ) {
                   s.base -= min;
-                  s.quote += output;
+                  s.quote -= output;
                });
                break;
             } else {
-               eosio_assert( false, "incorrect state" ); // todo: remove
+               eosio_assert( false, "incorrect state" );
             }
 
-            _accounts.adjust_balance( ex.manager, -min, "sold" );
-            _accounts.adjust_balance( ex.manager, output, "receive" );
+            _accounts.adjust_balance( order.manager, -min, "sold" );
+            _accounts.adjust_balance( order.manager, output, "receive" );
          }
 
          eosio_assert( received == t.receive, "unable to fill");
@@ -77,27 +81,34 @@ namespace eosio {
          extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
          extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
          extended_asset estimated_to_sold;
-         for (auto ex_itr = indexed_exstates.cbegin(); ex_itr != indexed_exstates.cend(); ex_itr++) {
-            auto ex = *ex_itr;
-            estimated_to_sold = t.sell - sold;
-            auto min = min_asset(ex.quote, estimated_to_sold);
-            sold += min;
-            extended_asset output = ex.convert(min, ex.base.get_extended_symbol());
 
-            if (min == ex.quote ) {
-               indexed_exstates.erase(ex_itr);
-            } else if (min < ex.quote) {
-               indexed_exstates.modify( ex_itr, _this_contract, [&]( auto& s ) {
-                    s.base -= output;
-                    s.quote += min;
-                });
-                break;
+         auto order_itr = sorted_orders.cbegin();
+         while (order_itr != sorted_orders.cend()) {
+            auto order = *order_itr;
+            if (order.manager == t.seller) {
+               order_itr++;
+               continue;
+            }
+            estimated_to_sold = t.sell - sold;
+            auto min = min_asset(order.quote, estimated_to_sold);
+            sold += min;
+            extended_asset output = order.convert(min, order.base.get_extended_symbol());
+            received += output;
+
+            if (min == order.quote ) {
+               order_itr = sorted_orders.erase(order_itr);
+            } else if (min < order.quote) {
+               sorted_orders.modify( order_itr, _this_contract, [&]( auto& s ) {
+                  s.base -= output;
+                  s.quote -= min;
+               });
+               break;
             } else {
-                eosio_assert( false, "incorrect state" ); // todo: remove
+               eosio_assert( false, "incorrect state" );
             }
 
-            _accounts.adjust_balance( ex.manager, -min, "sold" );
-            _accounts.adjust_balance( ex.manager, output, "receive" );
+            _accounts.adjust_balance( order.manager, -min, "sold" );
+            _accounts.adjust_balance( order.manager, output, "receive" );
          }
 
          eosio_assert( sold == t.sell, "unable to fill");
@@ -105,8 +116,6 @@ namespace eosio {
          _accounts.adjust_balance( t.seller, -sold, "sold" );
          _accounts.adjust_balance( t.seller, received, "received" );
       }
-
-      // todo: check that sender's balance is enough
    }
 
    void exchange::createx( account_name    creator,
@@ -122,20 +131,16 @@ namespace eosio {
                     "must exchange between two different currencies" );
       // todo: check that sender's balance is enough
 
-      print( "base: ", base_deposit.get_extended_symbol(), '\n');
-      print( "quote: ",quote_deposit.get_extended_symbol(), '\n');
+      exchange_state exstate = exchange_state(creator, base_deposit, quote_deposit);
+      print( "base: ", exstate.base.get_extended_symbol(), '\n');
+      print( "quote: ", exstate.quote.get_extended_symbol(), '\n');
 
       markets exstates( _this_contract, _this_contract );
-
-      auto existing = exstates.find( exchange_state::create_primary_key(creator, base_deposit, quote_deposit) );
+      auto existing = exstates.find( exstate.primary_key() );
 
       if (existing == exstates.end()) {
          print("create new trade\n");
-         exstates.emplace( creator, [&]( auto& s ) {
-            s.manager = creator;
-            s.base = base_deposit;
-            s.quote = quote_deposit;
-         });
+         exstates.emplace( creator, [&]( auto& s ) { s = exstate; } );
       } else {
          print("combine trades with same rate\n");
          exstates.modify(existing, _this_contract, [&]( auto& s ) {
