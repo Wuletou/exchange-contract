@@ -10,9 +10,9 @@ namespace eosio {
       extended_asset out;
 
       if (from_symbol == base_symbol && to_symbol == quote_symbol) {
-         out = extended_asset( from.amount * get_price(), to_symbol );
-      } else if (from_symbol == quote_symbol && to_symbol == base_symbol) {
          out = extended_asset( from.amount * get_rprice(), to_symbol );
+      } else if (from_symbol == quote_symbol && to_symbol == base_symbol) {
+         out = extended_asset( from.amount * get_price(), to_symbol );
       } else {
          eosio_assert( false, "invalid conversion" );
       }

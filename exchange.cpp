@@ -45,7 +45,8 @@ namespace eosio {
          auto order_itr = sorted_orders.cbegin();
          while (order_itr != sorted_orders.cend()) {
             auto order = *order_itr;
-            if (order.manager == t.seller) {
+            if (order.manager == t.seller || order.quote.get_extended_symbol() != t.sell.get_extended_symbol()
+                                          || order.base.get_extended_symbol() != t.receive.get_extended_symbol()) {
                order_itr++;
                continue;
             }
@@ -62,13 +63,14 @@ namespace eosio {
                   s.base -= min;
                   s.quote -= output;
                });
-               break;
             } else {
                eosio_assert( false, "incorrect state" );
             }
 
             _accounts.adjust_balance( order.manager, -min, "sold" );
             _accounts.adjust_balance( order.manager, output, "receive" );
+
+            if ( received == t.receive ) break;
          }
 
          eosio_assert( received == t.receive, "unable to fill");
@@ -85,7 +87,8 @@ namespace eosio {
          auto order_itr = sorted_orders.cbegin();
          while (order_itr != sorted_orders.cend()) {
             auto order = *order_itr;
-            if (order.manager == t.seller) {
+            if (order.manager == t.seller || order.quote.get_extended_symbol() != t.sell.get_extended_symbol()
+                                          || order.base.get_extended_symbol() != t.receive.get_extended_symbol()) {
                order_itr++;
                continue;
             }
@@ -102,13 +105,14 @@ namespace eosio {
                   s.base -= output;
                   s.quote -= min;
                });
-               break;
             } else {
                eosio_assert( false, "incorrect state" );
             }
 
             _accounts.adjust_balance( order.manager, -min, "sold" );
             _accounts.adjust_balance( order.manager, output, "receive" );
+
+            if ( sold == t.sell ) break;
          }
 
          eosio_assert( sold == t.sell, "unable to fill");
