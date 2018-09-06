@@ -41,6 +41,13 @@
       ]
     },
     {
+      "name": "cancelx",
+      "base": "",
+      "fields": [
+        {"name":"pk_value", "type":"uint64"}
+      ]
+    },
+    {
       "name": "transfer",
       "base": "",
       "fields": [
@@ -101,6 +108,7 @@
       "name": "exchange_state",
       "base": "",
       "fields": [
+        {"name": "pk_value", "type": "uint64"},
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "extended_asset"},
         {"name": "quote", "type": "extended_asset"},
@@ -114,6 +122,7 @@
     { "name": "transfer", "type": "transfer", "ricardian_contract": "" },
     { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
+    { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
     { "name": "issue", "type": "issue", "ricardian_contract": "" },
     { "name": "create", "type": "create", "ricardian_contract": "" }
   ],

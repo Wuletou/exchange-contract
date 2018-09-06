@@ -135,23 +135,31 @@ namespace eosio {
                     "must exchange between two different currencies" );
       // todo: check that sender's balance is enough
 
-      exchange_state exstate = exchange_state(creator, base_deposit, quote_deposit);
-      print( "base: ", exstate.base.get_extended_symbol(), '\n');
-      print( "quote: ", exstate.quote.get_extended_symbol(), '\n');
+      exchange_state order = exchange_state(creator, base_deposit, quote_deposit);
+      print( "base: ", order.base.get_extended_symbol(), '\n');
+      print( "quote: ", order.quote.get_extended_symbol(), '\n');
 
-      markets exstates( _this_contract, _this_contract );
-      auto existing = exstates.find( exstate.primary_key() );
+      markets orders( _this_contract, _this_contract );
+      auto existing = orders.find( order.primary_key() );
 
-      if (existing == exstates.end()) {
+      if (existing == orders.end()) {
          print("create new trade\n");
-         exstates.emplace( creator, [&]( auto& s ) { s = exstate; } );
+         orders.emplace( creator, [&]( auto& s ) { s = order; } );
       } else {
          print("combine trades with same rate\n");
-         exstates.modify(existing, _this_contract, [&]( auto& s ) {
+         orders.modify(existing, _this_contract, [&]( auto& s ) {
             s.base += base_deposit;
             s.quote += quote_deposit;
          });
       }
+   }
+
+   void exchange::cancelx( uint64_t pk_value ) {
+      markets orders( _this_contract, _this_contract );
+      auto order = orders.find( pk_value );
+      eosio_assert( order != orders.end(), "order doesn't exist" );
+      require_auth( order->manager );
+      orders.erase(order);
    }
 
    void exchange::on( const currency::transfer& t, account_name code ) {
@@ -183,7 +191,7 @@ namespace eosio {
 
       auto& thiscontract = *this;
       switch( act ) {
-         EOSIO_API( exchange, (createx)(deposit)(withdraw) )
+         EOSIO_API( exchange, (createx)(cancelx)(deposit)(withdraw) )
       };
 
       switch( act ) {

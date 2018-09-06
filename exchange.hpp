@@ -24,6 +24,7 @@ namespace eosio {
                        extended_asset  quote_deposit
                      );
 
+         void cancelx( uint64_t pk_value );
          void deposit( account_name from, extended_asset quantity );
          void withdraw( account_name  from, extended_asset quantity );
 

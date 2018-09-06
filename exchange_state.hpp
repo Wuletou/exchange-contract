@@ -6,6 +6,7 @@
 namespace eosio {
 
    struct exchange_state {
+      uint64_t       pk_value;
       account_name   manager;
       extended_asset base;
       extended_asset quote;
@@ -18,9 +19,10 @@ namespace eosio {
          this->base = base;
          this->quote = quote;
          this->price = (double) base.amount / quote.amount;
+         this->pk_value = manager + base.symbol.name() + quote.symbol.name() + price * POW10(15);
       }
 
-      uint64_t primary_key() const { return manager + base.symbol.name() + quote.symbol.name() + price * POW10(15); }
+      uint64_t primary_key() const { return pk_value; }
 
       account_name get_manager() const { return manager; };
       double get_price() const { return price; }
@@ -29,7 +31,7 @@ namespace eosio {
       extended_asset convert( extended_asset from, extended_symbol to_symbol );
       void print() const;
 
-      EOSLIB_SERIALIZE( exchange_state, (manager)(base)(quote)(price) )
+      EOSLIB_SERIALIZE( exchange_state, (pk_value)(manager)(base)(quote)(price) )
    };
 
    typedef eosio::multi_index<N(markets), exchange_state,
