@@ -5,39 +5,42 @@
 
 namespace eosio {
 
-   struct exchange_state {
-      uint64_t       pk_value;
-      account_name   manager;
-      extended_asset base;
-      extended_asset quote;
-      double         price;
+    struct exchange_state {
+        uint64_t pk_value;
+        account_name manager;
+        extended_asset base;
+        extended_asset quote;
+        double price;
 
-      exchange_state() { }
+        exchange_state() {}
 
-      exchange_state(account_name manager, extended_asset base, extended_asset quote) {
-         this->manager = manager;
-         this->base = base;
-         this->quote = quote;
-         this->price = (double) base.amount / quote.amount;
-         this->pk_value = manager + base.symbol.name() + quote.symbol.name() + price * POW10(15);
-      }
+        exchange_state(account_name manager, extended_asset base, extended_asset quote) {
+            this->manager = manager;
+            this->base = base;
+            this->quote = quote;
+            this->price = (double) base.amount / quote.amount;
+            this->pk_value = manager + base.symbol.name() + quote.symbol.name() + price * POW10(15);
+        }
 
-      uint64_t primary_key() const { return pk_value; }
+        uint64_t primary_key() const { return pk_value; }
 
-      account_name get_manager() const { return manager; };
-      double get_price() const { return price; }
-      double get_rprice() const { return 1 / price; }
+        account_name get_manager() const { return manager; };
 
-      extended_asset convert( extended_asset from, extended_symbol to_symbol );
-      void print() const;
+        double get_price() const { return price; }
 
-      EOSLIB_SERIALIZE( exchange_state, (pk_value)(manager)(base)(quote)(price) )
-   };
+        double get_rprice() const { return 1 / price; }
 
-   typedef eosio::multi_index<N(markets), exchange_state,
-      indexed_by< N(byprice),  const_mem_fun< exchange_state, double, &exchange_state::get_price > >,
-      indexed_by< N(byrprice), const_mem_fun< exchange_state, double, &exchange_state::get_rprice > >,
-      indexed_by< N(bymanager),const_mem_fun< exchange_state, account_name, &exchange_state::get_manager > >
-   > markets;
+        extended_asset convert(extended_asset from, extended_symbol to_symbol);
+
+        void print() const;
+
+        EOSLIB_SERIALIZE(exchange_state, (pk_value)(manager)(base)(quote)(price))
+    };
+
+    typedef eosio::multi_index<N(markets), exchange_state,
+            indexed_by < N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >,
+            indexed_by<N(byrprice), const_mem_fun < exchange_state, double, &exchange_state::get_rprice> >,
+            indexed_by<N(bymanager), const_mem_fun < exchange_state, account_name, &exchange_state::get_manager> >
+    > markets;
 
 } /// namespace eosio
