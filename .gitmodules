@@ -1,0 +1,3 @@
+[submodule "wu-token"]
+	path = wu-token
+	url = https://github.com/Wuletou/wu-token.git

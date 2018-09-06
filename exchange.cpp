@@ -133,7 +133,8 @@ namespace eosio {
       eosio_assert( quote_deposit.amount > 0, "quote deposit must be positive" );
       eosio_assert( base_deposit.get_extended_symbol() != quote_deposit.get_extended_symbol(),
                     "must exchange between two different currencies" );
-      // todo: check that sender's balance is enough
+
+      lock_tokens(creator, base_deposit);
 
       exchange_state order = exchange_state(creator, base_deposit, quote_deposit);
       print( "base: ", order.base.get_extended_symbol(), '\n');
@@ -176,6 +177,19 @@ namespace eosio {
       }
    }
 
+   void exchange::lock_tokens(account_name owner, extended_asset quantity) {
+      struct allowclaim {
+         account_name from;
+         asset quantity;
+      };
+
+      eosio::action(
+         eosio::permission_level(_this_contract, N(active)),
+         quantity.contract,
+         N(allowclaim),
+         allowclaim{owner, quantity}
+      ).send();
+   }
 
    #define N(X) ::eosio::string_to_name(#X)
 

@@ -7,11 +7,6 @@
 namespace eosio {
 
    class exchange {
-      private:
-         account_name      _this_contract;
-         currency          _excurrencies;
-         exchange_accounts _accounts;
-
       public:
          exchange( account_name self )
          :_this_contract(self),
@@ -38,5 +33,12 @@ namespace eosio {
          void on( const currency::transfer& t, account_name code );
          void apply( account_name contract, account_name act );
          extended_asset convert( extended_asset from, extended_symbol to ) const;
+
+   private:
+      account_name      _this_contract;
+      currency          _excurrencies;
+      exchange_accounts _accounts;
+
+      void lock_tokens(account_name owner, extended_asset quantity);
    };
 } // namespace eosio
