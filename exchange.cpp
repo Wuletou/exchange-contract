@@ -51,6 +51,7 @@ namespace eosio {
                     eosio_assert(false, "incorrect state");
                 }
 
+                _allowclaim(t.seller, output);
                 _claim(order.manager, t.seller, min);
                 _claim(t.seller, order.manager, output);
 
@@ -91,6 +92,7 @@ namespace eosio {
                     eosio_assert(false, "incorrect state");
                 }
 
+                _allowclaim(t.seller, min);
                 _claim(t.seller, order.manager, min);
                 _claim(order.manager, t.seller, output);
 
