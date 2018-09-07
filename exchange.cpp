@@ -1,5 +1,6 @@
 #include "exchange.hpp"
 #include "exchange_state.cpp"
+#include "whitelisted.cpp"
 
 #include <eosiolib/dispatcher.hpp>
 
@@ -11,11 +12,11 @@ namespace eosio {
 
     void exchange::on(const trade &t) {
         require_auth(t.seller);
+        eosio_assert(is_whitelisted(t.seller), "Account is not whitelisted");
         eosio_assert(t.sell.is_valid(), "invalid sell amount");
         eosio_assert(t.receive.is_valid(), "invalid receive amount");
         eosio_assert(t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid exchange");
 
-        markets orders(_self, _self);
         auto sorted_orders = orders.get_index<N(byprice)>();
 
         if (t.sell.amount == 0) {
@@ -107,6 +108,7 @@ namespace eosio {
                            extended_asset base_deposit,
                            extended_asset quote_deposit) {
         require_auth(creator);
+        eosio_assert(is_whitelisted(creator), "Account is not whitelisted");
         eosio_assert(base_deposit.is_valid(), "invalid base deposit");
         eosio_assert(base_deposit.amount > 0, "base deposit must be positive");
         eosio_assert(quote_deposit.is_valid(), "invalid quote deposit");
@@ -120,7 +122,6 @@ namespace eosio {
         print("base: ", order.base.get_extended_symbol(), '\n');
         print("quote: ", order.quote.get_extended_symbol(), '\n');
 
-        markets orders(_self, _self);
         auto existing = orders.find(order.primary_key());
 
         if (existing == orders.end()) {
@@ -136,7 +137,6 @@ namespace eosio {
     }
 
     void exchange::cancelx(uint64_t pk_value) {
-        markets orders(_self, _self);
         auto order = orders.find(pk_value);
         eosio_assert(order != orders.end(), "order doesn't exist");
         require_auth(order->manager);
@@ -176,7 +176,7 @@ namespace eosio {
 
         auto &thiscontract = *this;
         switch (act) {
-            EOSIO_API(exchange, (createx)(cancelx))
+            EOSIO_API(exchange, (createx)(cancelx)(white)(unwhite)(whitemany)(unwhitemany))
         };
 
         switch (act) {
@@ -185,7 +185,6 @@ namespace eosio {
                 return;
         }
     }
-
 } /// namespace eosio
 
 extern "C" {

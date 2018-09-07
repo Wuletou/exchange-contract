@@ -3,24 +3,30 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <boost/container/flat_map.hpp>
+#include "exchange_state.hpp"
+#include "whitelisted.hpp"
 
 namespace eosio {
 
-    class exchange : public contract {
+    class exchange : public whitelisted {
     public:
-        exchange(account_name self) : contract(self) {}
+        exchange(account_name self)
+                : whitelisted(self),
+                  orders(self, self) {}
 
-        void createx(account_name creator,
-                     extended_asset base_deposit,
-                     extended_asset quote_deposit);
-
-        void cancelx(uint64_t pk_value);
+        markets orders;
 
         struct trade {
             account_name seller;
             extended_asset sell;
             extended_asset receive;
         };
+
+        void createx(account_name creator,
+                     extended_asset base_deposit,
+                     extended_asset quote_deposit);
+
+        void cancelx(uint64_t pk_value);
 
         void on(const trade &t);
 
@@ -29,8 +35,6 @@ namespace eosio {
         extended_asset convert(extended_asset from, extended_symbol to) const;
 
     private:
-        account_name _this_contract;
-
         void _allowclaim(account_name owner, extended_asset quantity);
 
         void _claim(account_name owner,

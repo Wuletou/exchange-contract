@@ -56,12 +56,46 @@
         {"name": "quote", "type": "extended_asset"},
         {"name": "price", "type": "float64"}
       ]
+    },{
+      "name": "whitelist",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "white",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "unwhite",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "whitemany",
+      "base": "",
+      "fields": [
+        {"name": "accounts", "type": "name[]"}
+      ]
+    },{
+      "name": "unwhitemany",
+      "base": "",
+      "fields": [
+        {"name": "accounts", "type": "name[]"}
+      ]
     }
   ],
   "actions": [
     { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
     { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
+    { "name": "white", "type": "white", "ricardian_contract": "" },
+    { "name": "unwhite", "type": "unwhite", "ricardian_contract": "" },
+    { "name": "whitemany", "type": "whitemany", "ricardian_contract": "" },
+    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" }
   ],
   "tables": [{
       "name": "markets",
@@ -69,6 +103,12 @@
       "key_names": ["pk_value"],
       "key_types": ["name"],
       "type": "exchange_state"
+    },{
+      "name": "whitelist",
+      "index_type": "i64",
+      "key_names": ["account"],
+      "key_types": ["name"],
+      "type": "whitelist"
     }
   ],
   "ricardian_clauses": [],

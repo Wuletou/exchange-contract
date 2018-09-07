@@ -38,9 +38,7 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<N(markets), exchange_state,
-            indexed_by < N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >,
-            indexed_by<N(byrprice), const_mem_fun < exchange_state, double, &exchange_state::get_rprice> >,
-            indexed_by<N(bymanager), const_mem_fun < exchange_state, account_name, &exchange_state::get_manager> >
+            indexed_by<N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >
     > markets;
 
 } /// namespace eosio
