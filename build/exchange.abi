@@ -10,7 +10,7 @@
       "name": "extended_symbol",
       "base": "",
       "fields": [
-        {"name":"sym",      "type":"symbol"},
+        {"name":"sym", "type":"symbol"},
         {"name":"contract", "type":"account_name"}
       ]
     },
@@ -41,66 +41,16 @@
       ]
     },
     {
-      "name": "transfer",
+      "name": "cancelx",
       "base": "",
       "fields": [
-        {"name":"from", "type":"account_name"},
-        {"name":"to", "type":"account_name"},
-        {"name":"quantity", "type":"asset"},
-        {"name":"memo", "type":"string"}
-      ]
-    },
-    {
-      "name": "deposit",
-      "base": "",
-      "fields": [
-        {"name":"from", "type":"account_name"},
-        {"name":"quantity", "type":"extended_asset"}
-      ]
-    },
-    {
-      "name": "withdraw",
-      "base": "",
-      "fields": [
-        {"name":"from", "type":"account_name"},
-        {"name":"quantity", "type":"extended_asset"}
-      ]
-    },{
-     "name": "create",
-     "base": "",
-     "fields": [
-        {"name":"issuer", "type":"account_name"},
-        {"name":"maximum_supply", "type":"asset"},
-        {"name":"can_freeze", "type":"uint8"},
-        {"name":"can_recall", "type":"uint8"},
-        {"name":"can_whitelist", "type":"uint8"}
-     ]
-  },{
-     "name": "issue",
-     "base": "",
-     "fields": [
-        {"name":"to", "type":"account_name"},
-        {"name":"quantity", "type":"asset"},
-        {"name":"memo", "type":"string"}
-     ]
-  },{
-      "name": "account",
-      "base": "",
-      "fields": [
-        {"name":"currency", "type":"uint64"},
-        {"name":"balance", "type":"uint64"}
-      ]
-    },{
-      "name": "currency_stats",
-      "base": "",
-      "fields": [
-        {"name":"currency", "type":"uint64"},
-        {"name":"supply", "type":"uint64"}
+        {"name":"pk_value", "type":"uint64"}
       ]
     },{
       "name": "exchange_state",
       "base": "",
       "fields": [
+        {"name": "pk_value", "type": "uint64"},
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "extended_asset"},
         {"name": "quote", "type": "extended_asset"},
@@ -109,27 +59,11 @@
     }
   ],
   "actions": [
-    { "name": "deposit", "type": "deposit", "ricardian_contract": "" },
-    { "name": "withdraw", "type": "withdraw", "ricardian_contract": "" },
-    { "name": "transfer", "type": "transfer", "ricardian_contract": "" },
     { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
-    { "name": "issue", "type": "issue", "ricardian_contract": "" },
-    { "name": "create", "type": "create", "ricardian_contract": "" }
+    { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
   ],
   "tables": [{
-      "name": "account",
-      "type": "account",
-      "index_type": "i64",
-      "key_names" : ["currency"],
-      "key_types" : ["uint64"]
-    },{
-      "name": "stat",
-      "type": "currency_stats",
-      "index_type": "i64",
-      "key_names" : ["currency"],
-      "key_types" : ["uint64"]
-    },{
       "name": "markets",
       "index_type": "i64",
       "key_names": ["pk_value"],
