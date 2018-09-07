@@ -11,6 +11,7 @@ namespace eosio {
 
     void exchange::on(const trade &t) {
         require_auth(t.seller);
+        eosio_assert(is_whitelisted(t.seller), "Account is not whitelisted");
         eosio_assert(t.sell.is_valid(), "invalid sell amount");
         eosio_assert(t.receive.is_valid(), "invalid receive amount");
         eosio_assert(t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid exchange");
@@ -107,6 +108,7 @@ namespace eosio {
                            extended_asset base_deposit,
                            extended_asset quote_deposit) {
         require_auth(creator);
+        eosio_assert(is_whitelisted(creator), "Account is not whitelisted");
         eosio_assert(base_deposit.is_valid(), "invalid base deposit");
         eosio_assert(base_deposit.amount > 0, "base deposit must be positive");
         eosio_assert(quote_deposit.is_valid(), "invalid quote deposit");

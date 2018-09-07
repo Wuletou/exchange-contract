@@ -58,5 +58,7 @@ namespace eosio {
         void setwhite(account_name account);
 
         void unsetwhite(account_name account);
+
+        bool is_whitelisted(account_name account) { return whitelist.find(account) != whitelist.end(); }
     };
 } // namespace eosio
