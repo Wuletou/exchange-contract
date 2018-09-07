@@ -1,5 +1,6 @@
 #include "exchange.hpp"
 #include "exchange_state.cpp"
+#include "whitelisted.cpp"
 
 #include <eosiolib/dispatcher.hpp>
 
@@ -178,7 +179,7 @@ namespace eosio {
 
         auto &thiscontract = *this;
         switch (act) {
-            EOSIO_API(exchange, (createx)(cancelx))
+            EOSIO_API(exchange, (createx)(cancelx)(white)(unwhite)(whitemany)(unwhitemany))
         };
 
         switch (act) {
@@ -187,45 +188,6 @@ namespace eosio {
                 return;
         }
     }
-
-    void exchange::setwhite(account_name account) {
-        auto it = whitelist.find(account);
-        eosio_assert(it == whitelist.end(), "Account already whitelisted");
-        whitelist.emplace(_self, [account](auto& e) {
-            e.account = account;
-        });
-    }
-
-    void exchange::unsetwhite(account_name account) {
-        auto it = whitelist.find(account);
-        eosio_assert(it != whitelist.end(), "Account not whitelisted");
-        whitelist.erase(it);
-    }
-
-    void exchange::white(account_name account) {
-        require_auth(_self);
-        setwhite(account);
-    }
-
-    void exchange::unwhite(account_name account) {
-        require_auth(_self);
-        unsetwhite(account);
-    }
-
-    void exchange::whitemany(vector<account_name> accounts) {
-        require_auth(_self);
-        for (auto account : accounts) {
-            setwhite(account);
-        }
-    }
-
-    void exchange::unwhitemany(vector<account_name> accounts) {
-        require_auth(_self);
-        for (auto account : accounts) {
-            unsetwhite(account);
-        }
-    }
-
 } /// namespace eosio
 
 extern "C" {
