@@ -3,6 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <boost/container/flat_map.hpp>
+#include "exchange_state.hpp"
 #include "whitelisted.hpp"
 
 namespace eosio {
@@ -10,13 +11,10 @@ namespace eosio {
     class exchange : public whitelisted {
     public:
         exchange(account_name self)
-                : whitelisted(self) {}
+                : whitelisted(self),
+                  orders(self, self) {}
 
-        void createx(account_name creator,
-                     extended_asset base_deposit,
-                     extended_asset quote_deposit);
-
-        void cancelx(uint64_t pk_value);
+        markets orders;
 
         struct trade {
             account_name seller;
@@ -24,6 +22,11 @@ namespace eosio {
             extended_asset receive;
         };
 
+        void createx(account_name creator,
+                     extended_asset base_deposit,
+                     extended_asset quote_deposit);
+
+        void cancelx(uint64_t pk_value);
 
         void on(const trade &t);
 
