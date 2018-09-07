@@ -56,6 +56,12 @@
         {"name": "quote", "type": "extended_asset"},
         {"name": "price", "type": "float64"}
       ]
+    },{
+      "name": "whitelist",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
     }
   ],
   "actions": [
@@ -69,6 +75,12 @@
       "key_names": ["pk_value"],
       "key_types": ["name"],
       "type": "exchange_state"
+    },{
+      "name": "whitelist",
+      "index_type": "i64",
+      "key_names": ["account"],
+      "key_types": ["name"],
+      "type": "whitelist"
     }
   ],
   "ricardian_clauses": [],

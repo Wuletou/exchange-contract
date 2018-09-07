@@ -8,7 +8,9 @@ namespace eosio {
 
     class exchange : public contract {
     public:
-        exchange(account_name self) : contract(self) {}
+        exchange(account_name self)
+                : contract(self),
+                  whitelist(self, self) {}
 
         void createx(account_name creator,
                      extended_asset base_deposit,
@@ -22,11 +24,27 @@ namespace eosio {
             extended_asset receive;
         };
 
+        struct whitelist {
+            account_name account;
+
+            uint64_t primary_key() const { return account; }
+        };
+
+        multi_index<N(whitelist), whitelist> whitelist;
+
         void on(const trade &t);
 
         void apply(account_name contract, account_name act);
 
         extended_asset convert(extended_asset from, extended_symbol to) const;
+
+        void white(account_name account);
+
+        void unwhite(account_name account);
+
+        void whitemany(vector<account_name> accounts);
+
+        void unwhitemany(vector<account_name> accounts);
 
     private:
         account_name _this_contract;
@@ -36,5 +54,9 @@ namespace eosio {
         void _claim(account_name owner,
                     account_name to,
                     extended_asset quantity);
+
+        void setwhite(account_name account);
+
+        void unsetwhite(account_name account);
     };
 } // namespace eosio
