@@ -26,6 +26,7 @@
       "name": "trade",
       "base": "",
       "fields": [
+        {"name":"pk_value", "type":"uint64"},
         {"name":"seller", "type":"account_name"},
         {"name":"sell", "type":"extended_asset"},
         {"name":"receive", "type":"extended_asset"},

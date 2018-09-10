@@ -17,6 +17,7 @@ namespace eosio {
         markets orders;
 
         struct trade {
+            uint64_t pk_value;
             account_name seller;
             extended_asset sell;
             extended_asset receive;

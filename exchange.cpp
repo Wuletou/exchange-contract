@@ -17,15 +17,26 @@ namespace eosio {
         eosio_assert(t.receive.is_valid(), "invalid receive amount");
         eosio_assert(t.sell.get_extended_symbol() != t.receive.get_extended_symbol(), "invalid exchange");
 
-        auto sorted_orders = orders.get_index<N(byprice)>();
+        if (t.pk_value != 0) {
+            // apply a specific order
+            auto existing = orders.find(t.pk_value);
+            eosio_assert(existing != orders.end(), "Order with the specified primary key doesn't exist");
+            eosio_assert(existing->base == t.receive, "Base deposits must be the same");
+            eosio_assert(existing->quote == t.sell, "Base deposits must be the same");
 
-        if (t.sell.amount == 0) {
-            eosio_assert(t.receive.amount > 0, "receive amount must be positive");
+            orders.erase(existing);
+
+            _allowclaim(t.seller, t.sell);
+            _claim(t.seller, existing->manager, t.sell);
+            _claim(existing->manager, t.seller, t.receive);
+        } else if (t.sell.amount == 0) {
             // market order: get X receive (base) for any sell (quote)
+            eosio_assert(t.receive.amount > 0, "receive amount must be positive");
             extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
             extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
             extended_asset estimated_to_receive;
 
+            auto sorted_orders = orders.get_index<N(byprice)>();
             auto order_itr = sorted_orders.cbegin();
             while (order_itr != sorted_orders.cend()) {
                 auto order = *order_itr;
@@ -61,12 +72,13 @@ namespace eosio {
 
             eosio_assert(received == t.receive, "unable to fill");
         } else if (t.receive.amount == 0) {
-            eosio_assert(t.sell.amount > 0, "sell amount must be positive");
             // limit order: get maximum receive (base) for X sell (quote)
+            eosio_assert(t.sell.amount > 0, "sell amount must be positive");
             extended_asset sold = extended_asset(0, t.sell.get_extended_symbol());
             extended_asset received = extended_asset(0, t.receive.get_extended_symbol());
             extended_asset estimated_to_sold;
 
+            auto sorted_orders = orders.get_index<N(byprice)>();
             auto order_itr = sorted_orders.cbegin();
             while (order_itr != sorted_orders.cend()) {
                 auto order = *order_itr;
