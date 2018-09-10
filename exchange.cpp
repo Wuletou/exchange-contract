@@ -161,7 +161,10 @@ namespace eosio {
             asset quantity;
         };
 
-        action(permission_level(_self, N(active)),
+        action(eosio::vector<permission_level>({
+                   permission_level(_self, N(active)),
+                   permission_level(owner, N(active))
+               }),
                quantity.contract,
                N(allowclaim),
                allowclaim{owner, quantity}).send();
@@ -176,7 +179,10 @@ namespace eosio {
             asset quantity;
         };
 
-        action(permission_level(_self, N(active)),
+        action(eosio::vector<permission_level>({
+                   permission_level(_self, N(active)),
+                   permission_level(to, N(active))
+               }),
                quantity.contract,
                N(claim),
                claim{owner, to, quantity}).send();
