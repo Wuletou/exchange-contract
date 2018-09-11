@@ -5,24 +5,26 @@
 
 namespace eosio {
 
+    struct pair_t {
+        uint64_t id;
+        extended_symbol base_symbol;
+        extended_symbol quote_symbol;
+
+        uint64_t primary_key() const { return id; }
+
+        EOSLIB_SERIALIZE(pair_t, (id)(base_symbol)(quote_symbol))
+    };
+
+    typedef multi_index<N(pairs), pair_t> pairs_table;
+
     struct exchange_state {
-        uint64_t pk_value;
+        uint64_t id;
         account_name manager;
         extended_asset base;
         extended_asset quote;
         double price;
 
-        exchange_state() {}
-
-        exchange_state(account_name manager, extended_asset base, extended_asset quote) {
-            this->manager = manager;
-            this->base = base;
-            this->quote = quote;
-            this->price = (double) base.amount / quote.amount;
-            this->pk_value = manager + base.symbol.name() + quote.symbol.name() + price * POW10(15);
-        }
-
-        uint64_t primary_key() const { return pk_value; }
+        uint64_t primary_key() const { return id; }
 
         account_name get_manager() const { return manager; };
 
@@ -34,11 +36,11 @@ namespace eosio {
 
         void print() const;
 
-        EOSLIB_SERIALIZE(exchange_state, (pk_value)(manager)(base)(quote)(price))
+        EOSLIB_SERIALIZE(exchange_state, (id)(manager)(base)(quote)(price))
     };
 
     typedef eosio::multi_index<N(markets), exchange_state,
             indexed_by<N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >
-    > markets;
+    > markets_table;
 
 } /// namespace eosio
