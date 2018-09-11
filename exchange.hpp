@@ -10,26 +10,48 @@ namespace eosio {
 
     class exchange : public whitelisted {
     public:
-        exchange(account_name self)
-                : whitelisted(self),
-                  orders(self, self) {}
+        exchange(account_name self) : whitelisted(self) {}
 
-        markets orders;
-
-        struct trade {
-            uint64_t pk_value;
+        struct spec_trade {
+            uint64_t id;
             account_name seller;
             extended_asset sell;
             extended_asset receive;
         };
 
-        void createx(account_name creator,
-                     extended_asset base_deposit,
-                     extended_asset quote_deposit);
+        struct market_trade {
+            account_name seller;
+            extended_symbol sell_symbol;
+            extended_asset receive;
+        };
 
-        void cancelx(uint64_t pk_value);
+        struct limit_trade {
+            account_name seller;
+            extended_asset sell;
+            extended_symbol receive_symbol;
+        };
 
-        void on(const trade &t);
+        struct cancelx {
+            uint64_t id;
+            extended_symbol base_symbol;
+            extended_symbol quote_symbol;
+        };
+
+        struct createx {
+            account_name creator;
+            extended_asset base_deposit;
+            extended_asset quote_deposit;
+        };
+
+        void on(const createx &c);
+
+        void on(const spec_trade &t);
+
+        void on(const market_trade &t);
+
+        void on(const limit_trade &t);
+
+        void on(const cancelx &c);
 
         void apply(account_name contract, account_name act);
 

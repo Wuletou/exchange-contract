@@ -23,15 +23,33 @@
       ]
     },
     {
-      "name": "trade",
+      "name": "spec_trade",
       "base": "",
       "fields": [
-        {"name":"pk_value", "type":"uint64"},
+        {"name":"id", "type":"uint64"},
         {"name":"seller", "type":"account_name"},
         {"name":"sell", "type":"extended_asset"},
         {"name":"receive", "type":"extended_asset"},
       ]
     },
+    {
+      "name": "market_trade",
+      "base": "",
+      "fields": [
+        {"name":"seller", "type":"account_name"},
+        {"name":"sell_symbol", "type":"extended_symbol"},
+        {"name":"receive", "type":"extended_asset"},
+      ]
+    },
+      {
+        "name": "limit_trade",
+        "base": "",
+        "fields": [
+          {"name":"seller", "type":"account_name"},
+          {"name":"sell", "type":"extended_asset"},
+          {"name":"receive_symbol", "type":"extended_symbol"},
+        ]
+      },
     {
       "name": "createx",
       "base": "",
@@ -45,13 +63,23 @@
       "name": "cancelx",
       "base": "",
       "fields": [
-        {"name":"pk_value", "type":"uint64"}
+        {"name":"id", "type":"uint64"}
+        {"name":"base_symbol", "type":"extended_symbol"}
+        {"name":"quote_symbol", "type":"extended_symbol"}
+      ]
+    },{
+      "name": "pair_t",
+      "base": "",
+      "fields": [
+        {"name": "id", "type": "uint64"},
+        {"name": "base_symbol", "type": "extended_symbol"},
+        {"name": "quote_symbol", "type": "extended_symbol"},
       ]
     },{
       "name": "exchange_state",
       "base": "",
       "fields": [
-        {"name": "pk_value", "type": "uint64"},
+        {"name": "id", "type": "uint64"},
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "extended_asset"},
         {"name": "quote", "type": "extended_asset"},
@@ -90,7 +118,9 @@
     }
   ],
   "actions": [
-    { "name": "trade", "type": "trade", "ricardian_contract": "" },
+    { "name": "spec.trade", "type": "spec_trade", "ricardian_contract": "" },
+    { "name": "market.trade", "type": "market_trade", "ricardian_contract": "" },
+    { "name": "limit.trade", "type": "limit_trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
     { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
     { "name": "white", "type": "white", "ricardian_contract": "" },
@@ -99,10 +129,16 @@
     { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" }
   ],
   "tables": [{
+      "name": "pairs",
+      "index_type": "i64",
+      "key_names": ["id"],
+      "key_types": ["uint64"],
+      "type": "pair_t"
+    },{
       "name": "markets",
       "index_type": "i64",
-      "key_names": ["pk_value"],
-      "key_types": ["name"],
+      "key_names": ["id"],
+      "key_types": ["uint64"],
       "type": "exchange_state"
     },{
       "name": "whitelist",
