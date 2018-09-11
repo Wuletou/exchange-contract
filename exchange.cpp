@@ -158,6 +158,7 @@ namespace eosio {
     void exchange::_allowclaim(account_name owner, extended_asset quantity) {
         struct allowclaim {
             account_name from;
+            account_name to;
             asset quantity;
         };
 
@@ -167,7 +168,7 @@ namespace eosio {
                }),
                quantity.contract,
                N(allowclaim),
-               allowclaim{owner, quantity}).send();
+               allowclaim{owner, _self, quantity}).send();
     }
 
     void exchange::_claim(account_name owner,
