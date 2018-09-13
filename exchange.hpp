@@ -5,42 +5,52 @@
 #include <boost/container/flat_map.hpp>
 #include "exchange_state.hpp"
 #include "whitelisted.hpp"
+#include "str_expand.h"
+#include "config.h"
 
 namespace eosio {
 
     class exchange : public whitelisted {
     public:
-        exchange(account_name self) : whitelisted(self) {}
+        exchange(account_name self)
+                : whitelisted(self)
+                , wu_contract(string_to_name(STR(WU_ACCOUNT)))
+                , wu_symbol(string_to_symbol(WU_DECIMALS, STR(WU_SYMBOL)))
+                , loyalty_contract(string_to_name(STR(LT_ACCOUNT))) {}
+
+        account_name wu_contract;
+        symbol_type wu_symbol;
+        account_name loyalty_contract;
 
         struct spec_trade {
             uint64_t id;
             account_name seller;
-            extended_asset sell;
-            extended_asset receive;
+            asset sell;
+            asset receive;
         };
 
         struct market_trade {
             account_name seller;
-            extended_symbol sell_symbol;
-            extended_asset receive;
+            symbol_type sell_symbol;
+            asset receive;
         };
 
         struct limit_trade {
             account_name seller;
-            extended_asset sell;
-            extended_symbol receive_symbol;
+            asset sell;
+            symbol_type receive_symbol;
         };
 
         struct cancelx {
             uint64_t id;
-            extended_symbol base_symbol;
-            extended_symbol quote_symbol;
+            symbol_type base_symbol;
+            symbol_type quote_symbol;
         };
 
         struct createx {
             account_name creator;
-            extended_asset base_deposit;
-            extended_asset quote_deposit;
+            asset base_deposit;
+            asset quote_deposit;
         };
 
         void on(const createx &c);

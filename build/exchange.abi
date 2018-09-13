@@ -7,29 +7,13 @@
   ],
   "structs": [
     {
-      "name": "extended_symbol",
-      "base": "",
-      "fields": [
-        {"name":"sym", "type":"symbol"},
-        {"name":"contract", "type":"account_name"}
-      ]
-    },
-    {
-      "name": "extended_asset",
-      "base": "",
-      "fields": [
-        {"name":"quantity", "type":"asset"},
-        {"name":"contract", "type":"account_name"}
-      ]
-    },
-    {
       "name": "spec_trade",
       "base": "",
       "fields": [
         {"name":"id", "type":"uint64"},
         {"name":"seller", "type":"account_name"},
-        {"name":"sell", "type":"extended_asset"},
-        {"name":"receive", "type":"extended_asset"},
+        {"name":"sell", "type":"asset"},
+        {"name":"receive", "type":"asset"},
       ]
     },
     {
@@ -37,8 +21,8 @@
       "base": "",
       "fields": [
         {"name":"seller", "type":"account_name"},
-        {"name":"sell_symbol", "type":"extended_symbol"},
-        {"name":"receive", "type":"extended_asset"},
+        {"name":"sell_symbol", "type":"symbol"},
+        {"name":"receive", "type":"asset"},
       ]
     },
       {
@@ -46,8 +30,8 @@
         "base": "",
         "fields": [
           {"name":"seller", "type":"account_name"},
-          {"name":"sell", "type":"extended_asset"},
-          {"name":"receive_symbol", "type":"extended_symbol"},
+          {"name":"sell", "type":"asset"},
+          {"name":"receive_symbol", "type":"symbol"},
         ]
       },
     {
@@ -55,8 +39,8 @@
       "base": "",
       "fields": [
         {"name":"creator", "type":"account_name"},
-        {"name":"base_deposit", "type":"extended_asset"},
-        {"name":"quote_deposit", "type":"extended_asset"}
+        {"name":"base_deposit", "type":"asset"},
+        {"name":"quote_deposit", "type":"asset"}
       ]
     },
     {
@@ -64,16 +48,16 @@
       "base": "",
       "fields": [
         {"name":"id", "type":"uint64"}
-        {"name":"base_symbol", "type":"extended_symbol"}
-        {"name":"quote_symbol", "type":"extended_symbol"}
+        {"name":"base_symbol", "type":"symbol"}
+        {"name":"quote_symbol", "type":"symbol"}
       ]
     },{
       "name": "pair_t",
       "base": "",
       "fields": [
         {"name": "id", "type": "uint64"},
-        {"name": "base_symbol", "type": "extended_symbol"},
-        {"name": "quote_symbol", "type": "extended_symbol"},
+        {"name": "base_symbol", "type": "symbol"},
+        {"name": "quote_symbol", "type": "symbol"},
       ]
     },{
       "name": "exchange_state",
@@ -81,8 +65,8 @@
       "fields": [
         {"name": "id", "type": "uint64"},
         {"name": "manager", "type": "name"},
-        {"name": "base", "type": "extended_asset"},
-        {"name": "quote", "type": "extended_asset"},
+        {"name": "base", "type": "asset"},
+        {"name": "quote", "type": "asset"},
         {"name": "price", "type": "float64"}
       ]
     },{
