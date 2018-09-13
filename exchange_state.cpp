@@ -2,16 +2,12 @@
 
 namespace eosio {
 
-    extended_asset exchange_state::convert(extended_asset from, extended_symbol to_symbol) {
-        auto from_symbol = from.get_extended_symbol();
-        auto base_symbol = base.get_extended_symbol();
-        auto quote_symbol = quote.get_extended_symbol();
-
+    extended_asset exchange_state::convert(extended_asset from, extended_symbol to_symbol) const {
         extended_asset out;
 
-        if (from_symbol == base_symbol && to_symbol == quote_symbol) {
+        if (from.symbol == base.symbol && to_symbol == quote.symbol) {
             out = extended_asset(from.amount * get_rprice(), to_symbol);
-        } else if (from_symbol == quote_symbol && to_symbol == base_symbol) {
+        } else if (from.symbol == quote.symbol && to_symbol == base.symbol) {
             out = extended_asset(from.amount * get_price(), to_symbol);
         } else {
             eosio_assert(false, "invalid conversion");
@@ -23,8 +19,8 @@ namespace eosio {
     void exchange_state::print() const {
         eosio::print(
                 name{manager}, ' ',
-                (asset) base, "->",
-                (asset) quote, ' ',
+                base, "->",
+                quote, ' ',
                 get_price(), ' ',
                 get_rprice(), ' ',
                 primary_key()

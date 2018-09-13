@@ -7,8 +7,8 @@ namespace eosio {
 
     struct pair_t {
         uint64_t id;
-        extended_symbol base_symbol;
-        extended_symbol quote_symbol;
+        symbol_type base_symbol;
+        symbol_type quote_symbol;
 
         uint64_t primary_key() const { return id; }
 
@@ -20,8 +20,8 @@ namespace eosio {
     struct exchange_state {
         uint64_t id;
         account_name manager;
-        extended_asset base;
-        extended_asset quote;
+        asset base;
+        asset quote;
         double price;
 
         uint64_t primary_key() const { return id; }
@@ -32,7 +32,7 @@ namespace eosio {
 
         double get_rprice() const { return 1 / price; }
 
-        extended_asset convert(extended_asset from, extended_symbol to_symbol);
+        extended_asset convert(extended_asset from, extended_symbol to_symbol) const;
 
         void print() const;
 
