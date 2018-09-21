@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 CONFIG_FILENAME="config.h"
+BUILD_DIR=build
+CPP_FILENAME=exchange.cpp
+ABI_FILENAME=exchange.abi
+WAST_FILENAME=exchange.wast
 
 ARGUMENT_LIST=(
 	"LT_ACCOUNT"
@@ -17,13 +21,13 @@ opts=$(getopt \
 )
 
 function usage() {
-	echo "Usage: ./configure.sh [ARGS]"
+	echo "Usage: ./compile.sh [ARGS]"
 	echo "--LT_ACCOUNT - account of Loyalty Token contract"
 	echo "--WU_ACCOUNT - account of WU Token contract"
 	echo "--WU_SYMBOL - WU token symbol"
 	echo "--WU_DECIMALS - WU token decimals"
 	echo "Example:"
-	echo "./configure.sh --LT_ACCOUNT lt.deployer --WU_ACCOUNT wu.deployer --WU_SYMBOL WU --WU_DECIMALS 4"
+	echo "./compile.sh --LT_ACCOUNT lt.deployer --WU_ACCOUNT wu.deployer --WU_SYMBOL WU --WU_DECIMALS 4"
 }
 
 function check_input() {
@@ -44,6 +48,14 @@ function out() {
 	echo "#define WU_ACCOUNT $WU_ACCOUNT" >> ${CONFIG_FILENAME}
 	echo "#define WU_SYMBOL $WU_SYMBOL" >> ${CONFIG_FILENAME}
 	echo "#define WU_DECIMALS $WU_DECIMALS" >> ${CONFIG_FILENAME}
+}
+
+function compile() {
+	mv ${BUILD_DIR}/${ABI_FILENAME} .
+	rm -rf ${BUILD_DIR}
+	mkdir ${BUILD_DIR}
+	mv ${ABI_FILENAME} ${BUILD_DIR}
+	eosiocpp -o ${BUILD_DIR}/${WAST_FILENAME} ${CPP_FILENAME}
 }
 
 eval set --$opts
@@ -76,3 +88,4 @@ done
 
 check_input
 out
+compile
