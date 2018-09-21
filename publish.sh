@@ -25,7 +25,7 @@ function usage() {
 	echo "--ABI_FILENAME - filename of abi"
 	echo "--WASM_FILENAME - filename of wasm"
 	echo "Example:"
-	echo "./configure.sh --ACCOUNT wulettest --NODEOS_URL https://api-wulet.unblocking.io/ --KEOSD_URL http://127.0.0.1:8900/ --ABI_FILENAME build/contract.abi --WASM_FILENAME build/contract.wasm"
+	echo "./publish.sh --ACCOUNT wulettest --NODEOS_URL https://api-wulet.unblocking.io/ --KEOSD_URL http://127.0.0.1:8900/ --ABI_FILENAME build/contract.abi --WASM_FILENAME build/contract.wasm"
 }
 
 function check_input() {
