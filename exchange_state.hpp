@@ -1,89 +1,46 @@
 #pragma once
 
 #include <eosiolib/asset.hpp>
-#include <eosiolib/multi_index.hpp>
-#include <cmath>
+#include "pow10.h"
 
 namespace eosio {
 
-   typedef double real_type;
+    struct pair_t {
+        uint64_t id;
+        symbol_type base_symbol;
+        symbol_type quote_symbol;
 
-   struct margin_state {
-      extended_asset total_lendable;
-      extended_asset total_lent;
-      real_type      least_collateralized = std::numeric_limits<double>::max();
+        uint64_t primary_key() const { return id; }
 
-      /**
-       * Total shares allocated to those who have lent, when someone unlends they get
-       * total_lendable * user_interest_shares / interest_shares and total_lendable is reduced.
-       *
-       * When interest is paid, it shows up in total_lendable
-       */
-      real_type      interest_shares = 0;
+        EOSLIB_SERIALIZE(pair_t, (id)(base_symbol)(quote_symbol))
+    };
 
-      real_type lend( int64_t new_lendable ) {
-         if( total_lendable.amount > 0 ) {
-            real_type new_shares =  (interest_shares * new_lendable) / total_lendable.amount;
-            interest_shares += new_shares;
-            total_lendable.amount += new_lendable;
-         } else {
-            interest_shares += new_lendable;
-            total_lendable.amount  += new_lendable;
-         }
-         return new_lendable;
-      }
+    typedef multi_index<N(pairs), pair_t> pairs_table;
 
-      extended_asset unlend( double ishares ) {
-         extended_asset result = total_lent;
-         print( "unlend: ", ishares, " existing interest_shares:  ", interest_shares, "\n" ); 
-         result.amount  = int64_t( (ishares * total_lendable.amount) / interest_shares );
+    struct exchange_state {
+        uint64_t id;
+        account_name manager;
+        asset base;
+        asset quote;
+        double price;
 
-         total_lendable.amount -= result.amount;
-         interest_shares -= ishares;
+        uint64_t primary_key() const { return id; }
 
-         eosio_assert( interest_shares >= 0, "underflow" );
-         eosio_assert( total_lendable.amount >= 0, "underflow" );
+        account_name get_manager() const { return manager; };
 
-         return result;
-      }
+        double get_price() const { return price; }
 
-      EOSLIB_SERIALIZE( margin_state, (total_lendable)(total_lent)(least_collateralized)(interest_shares) )
-   };
+        double get_rprice() const { return 1 / price; }
 
-   /**
-    *  Uses Bancor math to create a 50/50 relay between two asset types. The state of the
-    *  bancor exchange is entirely contained within this struct. There are no external
-    *  side effects associated with using this API.
-    */
-   struct exchange_state {
-      account_name      manager;
-      extended_asset    supply;
-      uint32_t          fee = 0;
+        extended_asset convert(extended_asset from, extended_symbol to_symbol) const;
 
-      struct connector {
-         extended_asset balance;
-         uint32_t       weight = 500;
+        void print() const;
 
-         margin_state   peer_margin; /// peer_connector collateral lending balance
+        EOSLIB_SERIALIZE(exchange_state, (id)(manager)(base)(quote)(price))
+    };
 
-         EOSLIB_SERIALIZE( connector, (balance)(weight)(peer_margin) )
-      };
-
-      connector base;
-      connector quote;
-
-      uint64_t primary_key()const { return supply.symbol.name(); }
-
-      extended_asset convert_to_exchange( connector& c, extended_asset in ); 
-      extended_asset convert_from_exchange( connector& c, extended_asset in );
-      extended_asset convert( extended_asset from, extended_symbol to );
-
-      bool requires_margin_call( const exchange_state::connector& con )const;
-      bool requires_margin_call()const;
-
-      EOSLIB_SERIALIZE( exchange_state, (manager)(supply)(fee)(base)(quote) )
-   };
-
-   typedef eosio::multi_index<N(markets), exchange_state> markets;
+    typedef eosio::multi_index<N(markets), exchange_state,
+            indexed_by<N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >
+    > markets_table;
 
 } /// namespace eosio

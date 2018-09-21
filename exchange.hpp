@@ -1,87 +1,77 @@
-#include <eosiolib/types.hpp>
-#include <eosiolib/currency.hpp>
+#pragma once
+
+#include <eosiolib/eosio.hpp>
+#include <eosiolib/asset.hpp>
 #include <boost/container/flat_map.hpp>
-#include <cmath>
-#include <exchange/market_state.hpp>
+#include "exchange_state.hpp"
+#include "whitelisted.hpp"
+#include "str_expand.h"
+#include "config.h"
 
 namespace eosio {
 
-   /**
-    *  This contract enables users to create an exchange between any pair of
-    *  standard currency types. A new exchange is created by funding it with
-    *  an equal value of both sides of the order book and giving the issuer
-    *  the initial shares in that orderbook.
-    *
-    *  To prevent exessive rounding errors, the initial deposit should include
-    *  a sizeable quantity of both the base and quote currencies and the exchange
-    *  shares should have a quantity 100x the quantity of the largest initial
-    *  deposit.
-    *
-    *  Users must deposit funds into the exchange before they can trade on the
-    *  exchange.
-    *
-    *  Each time an exchange is created a new currency for that exchanges market
-    *  maker is also created. This currencies supply and symbol must be unique and
-    *  it uses the currency contract's tables to manage it.
-    */
-   class exchange {
-      private:
-         account_name      _this_contract;
-         currency          _excurrencies;
-         exchange_accounts _accounts;
+    class exchange : public whitelisted {
+    public:
+        exchange(account_name self)
+                : whitelisted(self)
+                , wu_contract(string_to_name(STR(WU_ACCOUNT)))
+                , wu_symbol(string_to_symbol(WU_DECIMALS, STR(WU_SYMBOL)))
+                , loyalty_contract(string_to_name(STR(LT_ACCOUNT))) {}
 
-      public:
-         exchange( account_name self )
-         :_this_contract(self),
-          _excurrencies(self),
-          _accounts(self)
-         {}
+        account_name wu_contract;
+        symbol_type wu_symbol;
+        account_name loyalty_contract;
 
-         void createx( account_name    creator,
-                       asset           initial_supply,
-                       uint32_t        fee,
-                       extended_asset  base_deposit,
-                       extended_asset  quote_deposit
-                     );
+        struct spec_trade {
+            uint64_t id;
+            account_name seller;
+            asset sell;
+            asset receive;
+        };
 
-         void deposit( account_name from, extended_asset quantity );
-         void withdraw( account_name  from, extended_asset quantity );
-         void lend( account_name lender, symbol_type market, extended_asset quantity );
+        struct market_trade {
+            account_name seller;
+            symbol_type sell_symbol;
+            asset receive;
+        };
 
-         void unlend(
-            account_name     lender,
-            symbol_type      market,
-            double           interest_shares,
-            extended_symbol  interest_symbol
-         );
+        struct limit_trade {
+            account_name seller;
+            asset sell;
+            symbol_type receive_symbol;
+        };
 
-         struct covermargin {
-            account_name     borrower;
-            symbol_type      market;
-            extended_asset   cover_amount;
-         };
+        struct cancelx {
+            uint64_t id;
+            symbol_type base_symbol;
+            symbol_type quote_symbol;
+        };
 
-         struct upmargin {
-            account_name     borrower;
-            symbol_type      market;
-            extended_asset   delta_borrow;
-            extended_asset   delta_collateral;
-         };
+        struct createx {
+            account_name creator;
+            asset base_deposit;
+            asset quote_deposit;
+        };
 
-         struct trade {
-            account_name    seller;
-            symbol_type     market;
-            extended_asset  sell;
-            extended_asset  min_receive;
-            uint32_t        expire = 0;
-            uint8_t         fill_or_kill = true;
-         };
+        void on(const createx &c);
 
-         void on( const trade& t    );
-         void on( const upmargin& b );
-         void on( const covermargin& b );
-         void on( const currency::transfer& t, account_name code );
+        void on(const spec_trade &t);
 
-         void apply( account_name contract, account_name act );
-   };
+        void on(const market_trade &t);
+
+        void on(const limit_trade &t);
+
+        void on(const cancelx &c);
+
+        void apply(account_name contract, account_name act);
+
+        extended_asset convert(extended_asset from, extended_symbol to) const;
+
+    private:
+        void _allowclaim(account_name owner, extended_asset quantity);
+
+        void _claim(account_name owner,
+                    account_name to,
+                    extended_asset quantity);
+    };
 } // namespace eosio

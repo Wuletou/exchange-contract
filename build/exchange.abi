@@ -1,0 +1,137 @@
+{
+  "version": "eosio::abi/1.0",
+  "types": [{
+      "new_type_name": "account_name",
+      "type": "name"
+    }
+  ],
+  "structs": [
+    {
+      "name": "spec_trade",
+      "base": "",
+      "fields": [
+        {"name":"id", "type":"uint64"},
+        {"name":"seller", "type":"account_name"},
+        {"name":"sell", "type":"asset"},
+        {"name":"receive", "type":"asset"},
+      ]
+    },
+    {
+      "name": "market_trade",
+      "base": "",
+      "fields": [
+        {"name":"seller", "type":"account_name"},
+        {"name":"sell_symbol", "type":"symbol"},
+        {"name":"receive", "type":"asset"},
+      ]
+    },
+      {
+        "name": "limit_trade",
+        "base": "",
+        "fields": [
+          {"name":"seller", "type":"account_name"},
+          {"name":"sell", "type":"asset"},
+          {"name":"receive_symbol", "type":"symbol"},
+        ]
+      },
+    {
+      "name": "createx",
+      "base": "",
+      "fields": [
+        {"name":"creator", "type":"account_name"},
+        {"name":"base_deposit", "type":"asset"},
+        {"name":"quote_deposit", "type":"asset"}
+      ]
+    },
+    {
+      "name": "cancelx",
+      "base": "",
+      "fields": [
+        {"name":"id", "type":"uint64"}
+        {"name":"base_symbol", "type":"symbol"}
+        {"name":"quote_symbol", "type":"symbol"}
+      ]
+    },{
+      "name": "pair_t",
+      "base": "",
+      "fields": [
+        {"name": "id", "type": "uint64"},
+        {"name": "base_symbol", "type": "symbol"},
+        {"name": "quote_symbol", "type": "symbol"},
+      ]
+    },{
+      "name": "exchange_state",
+      "base": "",
+      "fields": [
+        {"name": "id", "type": "uint64"},
+        {"name": "manager", "type": "name"},
+        {"name": "base", "type": "asset"},
+        {"name": "quote", "type": "asset"},
+        {"name": "price", "type": "float64"}
+      ]
+    },{
+      "name": "whitelist",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "white",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "unwhite",
+      "base": "",
+      "fields": [
+        {"name": "account", "type": "name"}
+      ]
+    },{
+      "name": "whitemany",
+      "base": "",
+      "fields": [
+        {"name": "accounts", "type": "name[]"}
+      ]
+    },{
+      "name": "unwhitemany",
+      "base": "",
+      "fields": [
+        {"name": "accounts", "type": "name[]"}
+      ]
+    }
+  ],
+  "actions": [
+    { "name": "spec.trade", "type": "spec_trade", "ricardian_contract": "" },
+    { "name": "market.trade", "type": "market_trade", "ricardian_contract": "" },
+    { "name": "limit.trade", "type": "limit_trade", "ricardian_contract": "" },
+    { "name": "createx", "type": "createx", "ricardian_contract": "" },
+    { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
+    { "name": "white", "type": "white", "ricardian_contract": "" },
+    { "name": "unwhite", "type": "unwhite", "ricardian_contract": "" },
+    { "name": "whitemany", "type": "whitemany", "ricardian_contract": "" },
+    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" }
+  ],
+  "tables": [{
+      "name": "pairs",
+      "index_type": "i64",
+      "key_names": ["id"],
+      "key_types": ["uint64"],
+      "type": "pair_t"
+    },{
+      "name": "markets",
+      "index_type": "i64",
+      "key_names": ["id"],
+      "key_types": ["uint64"],
+      "type": "exchange_state"
+    },{
+      "name": "whitelist",
+      "index_type": "i64",
+      "key_names": ["account"],
+      "key_types": ["name"],
+      "type": "whitelist"
+    }
+  ],
+  "ricardian_clauses": [],
+  "abi_extensions": []
+}
