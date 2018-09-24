@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 CONFIG_FILENAME="config.h"
 BUILD_DIR=build

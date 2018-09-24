@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
-
-TX_FILENAME=.tx
+set -e
 
 ARGUMENT_LIST=(
 	"ACCOUNT"
 	"NODEOS_URL"
 	"KEOSD_URL"
-	"ABI_FILENAME"
-	"WASM_FILENAME"
+	"CONTRACT_DIR"
 )
 
 opts=$(getopt \
@@ -22,10 +20,9 @@ function usage() {
 	echo "--ACCOUNT - account of contract to deploy"
 	echo "--NODEOS_URL - the http/https URL where nodeos is running"
 	echo "--KEOSD_URL - the http/https URL where keosd is running"
-	echo "--ABI_FILENAME - filename of abi"
-	echo "--WASM_FILENAME - filename of wasm"
+	echo "--CONTRACT_DIR - the path containing the .wasm and .abi"
 	echo "Example:"
-	echo "./publish.sh --ACCOUNT wulettest --NODEOS_URL https://api-wulet.unblocking.io/ --KEOSD_URL http://127.0.0.1:8900/ --ABI_FILENAME build/contract.abi --WASM_FILENAME build/contract.wasm"
+	echo "./publish.sh --ACCOUNT wuletexchacc --NODEOS_URL https://api-wulet.unblocking.io/ --KEOSD_URL http://127.0.0.1:8900/ --CONTRACT_DIR ../exchange"
 }
 
 function check_input() {
@@ -41,18 +38,8 @@ function check_input() {
 	fi
 }
 
-function combine_transaction() {
-	ABI=$(cleos -u ${NODEOS_URL} set abi ${ACCOUNT} ${ABI_FILENAME} -jd 2> /dev/null | grep \"data\" | cut -c 16- | rev | cut -c 2- | rev)
-    BYTECODE=$(cat ${WASM_FILENAME} | xxd -p | tr -d '\n')
-    SET_CODE_ACTION=$'{"account": "eosio", "name": "setcode", "authorization": [{"actor": "'${ACCOUNT}$'", "permission": "active"}], "data": {"account": "'${ACCOUNT}$'", "vmtype": 0, "vmversion": 0, "code": "'${BYTECODE}$'"}}'
-    SET_ABI_ACTION=$'{"account": "eosio", "name": "setabi", "authorization": [{"actor": "'${ACCOUNT}$'", "permission": "active"}], "data": "'${ABI}$'"}'
-    TX=$'{"actions": ['${SET_CODE_ACTION}$','${SET_ABI_ACTION}$']}'
-    echo ${TX} > ${TX_FILENAME}
-}
-
 function send_transaction() {
-    cleos -u ${NODEOS_URL} --wallet-url ${KEOSD_URL} push transaction ${TX_FILENAME}
-    rm ${TX_FILENAME}
+    cleos -u ${NODEOS_URL} --wallet-url ${KEOSD_URL} set contract ${ACCOUNT} ${CONTRACT_DIR}
 }
 
 eval set --$opts
@@ -73,13 +60,8 @@ while [[ $# -gt 0 ]]; do
 			shift 2
 			;;
 
-		--ABI_FILENAME)
-			ABI_FILENAME=$2
-			shift 2
-			;;
-
-		--WASM_FILENAME)
-			WASM_FILENAME=$2
+		--CONTRACT_DIR)
+			CONTRACT_DIR=$2
 			shift 2
 			;;
 		*)
@@ -89,5 +71,4 @@ while [[ $# -gt 0 ]]; do
 done
 
 check_input
-combine_transaction
 send_transaction
