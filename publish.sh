@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 ARGUMENT_LIST=(
 	"ACCOUNT"
@@ -34,12 +33,17 @@ function check_input() {
 	done
 	if [[ -n "$err" ]]; then
 		usage
-		exit 0
+		exit 1
 	fi
 }
 
 function send_transaction() {
-    cleos -u ${NODEOS_URL} --wallet-url ${KEOSD_URL} set contract ${ACCOUNT} ${CONTRACT_DIR}
+    res="$( cleos -u ${NODEOS_URL} --wallet-url ${KEOSD_URL} set contract ${ACCOUNT} ${CONTRACT_DIR} 2>&1 )"
+    exit_code=$?
+    echo ${res}
+    if [[ exit_code != 0 && !($res = *"Contract is already running this version of code"*) ]]; then
+        exit 1
+    fi
 }
 
 eval set --$opts
