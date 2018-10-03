@@ -270,6 +270,27 @@ namespace eosio {
         markets.erase(market);
     }
 
+    exchange::~exchange() {
+        if (!this->clean) return;
+
+        pairs_table pairs(_self, _self);
+        for (auto pair = pairs.begin(); pair != pairs.end(); ) {
+            markets_table markets(_self, pair->id);
+            for (auto market = markets.begin(); market != markets.end(); ) {
+                market = markets.erase(market);
+            }
+
+            pair = pairs.erase(pair);
+        }
+
+        this->clean = false;
+    }
+
+    void exchange::cleanstate() {
+        require_auth(this->_self);
+        this->clean = true;
+    }
+
     void exchange::_allowclaim(account_name owner, extended_asset quantity) {
         struct allowclaim {
             account_name from;
@@ -310,7 +331,7 @@ namespace eosio {
 
         auto &thiscontract = *this;
         switch (act) {
-            EOSIO_API(exchange, (white)(unwhite)(whitemany)(unwhitemany))
+            EOSIO_API(exchange, (white)(unwhite)(whitemany)(unwhitemany)(cleanstate))
         };
 
         switch (act) {

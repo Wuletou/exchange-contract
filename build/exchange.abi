@@ -99,6 +99,10 @@
       "fields": [
         {"name": "accounts", "type": "name[]"}
       ]
+    },,{
+      "name": "cleanstate",
+      "base": "",
+      "fields": []
     }
   ],
   "actions": [
@@ -110,7 +114,8 @@
     { "name": "white", "type": "white", "ricardian_contract": "" },
     { "name": "unwhite", "type": "unwhite", "ricardian_contract": "" },
     { "name": "whitemany", "type": "whitemany", "ricardian_contract": "" },
-    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" }
+    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" },
+    { "name": "cleanstate", "type": "cleanstate", "ricardian_contract": "" }
   ],
   "tables": [{
       "name": "pairs",
