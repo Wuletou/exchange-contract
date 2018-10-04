@@ -10,6 +10,14 @@ namespace eosio {
         return a < b ? a : b;
     }
 
+    uint64_t pow10(uint64_t power) {
+        uint64_t result = 1;
+        for (uint64_t i = 0; i < power; i++) {
+            result *= 10;
+        }
+        return result;
+    }
+
     void exchange::on(const spec_trade &t) {
         require_auth(t.seller);
         eosio_assert(is_whitelisted(t.seller), "Account is not whitelisted");
@@ -225,8 +233,8 @@ namespace eosio {
         print("base: ", base_deposit.get_extended_symbol(), '\n');
         print("quote: ", quote_deposit.get_extended_symbol(), '\n');
 
-        auto price = (double) (base_deposit.amount * quote_symbol.precision())
-                / (quote_deposit.amount * base_symbol.precision());
+        auto price = (double) (base_deposit.amount * pow10(quote_symbol.precision()))
+                / (quote_deposit.amount * pow10(base_symbol.precision()));
 
         auto markets = markets_table(_self, existing_pair->id);
         auto existing = markets.end();
