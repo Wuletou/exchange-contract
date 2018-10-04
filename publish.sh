@@ -40,8 +40,9 @@ function check_input() {
 function send_transaction() {
     res="$( cleos -u ${NODEOS_URL} --wallet-url ${KEOSD_URL} set contract ${ACCOUNT} ${CONTRACT_DIR} 2>&1 )"
     exit_code=$?
+    echo "exit_code: "${exit_code}
     echo ${res}
-    if [[ exit_code != 0 && !($res = *"Contract is already running this version of code"*) ]]; then
+    if [[ exit_code != 0 && !($res = *"Contract is already running this version of code"*) && !($res = *"existing abi"*) && !($res = *"existing code"*) ]]; then
         exit 1
     fi
 }
