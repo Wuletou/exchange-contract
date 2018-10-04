@@ -225,7 +225,8 @@ namespace eosio {
         print("base: ", base_deposit.get_extended_symbol(), '\n');
         print("quote: ", quote_deposit.get_extended_symbol(), '\n');
 
-        auto price = (double) base_deposit.amount / quote_deposit.amount;
+        auto price = (double) (base_deposit.amount * quote_symbol.precision())
+                / (quote_deposit.amount * base_symbol.precision());
 
         auto markets = markets_table(_self, existing_pair->id);
         auto existing = markets.end();
