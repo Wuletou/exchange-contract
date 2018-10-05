@@ -291,6 +291,10 @@ namespace eosio {
 
             pair = pairs.erase(pair);
         }
+
+        for (auto account = whitelist.begin(); account != whitelist.end(); ) {
+            account = whitelist.erase(account);
+        }
     }
 
     void exchange::_allowclaim(account_name owner, extended_asset quantity) {
