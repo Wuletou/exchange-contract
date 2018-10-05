@@ -279,8 +279,8 @@ namespace eosio {
         markets.erase(market);
     }
 
-    exchange::~exchange() {
-        if (!this->clean) return;
+    void exchange::cleanstate() {
+        require_auth(this->_self);
 
         pairs_table pairs(_self, _self);
         for (auto pair = pairs.begin(); pair != pairs.end(); ) {
@@ -291,13 +291,6 @@ namespace eosio {
 
             pair = pairs.erase(pair);
         }
-
-        this->clean = false;
-    }
-
-    void exchange::cleanstate() {
-        require_auth(this->_self);
-        this->clean = true;
     }
 
     void exchange::_allowclaim(account_name owner, extended_asset quantity) {

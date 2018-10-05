@@ -16,10 +16,7 @@ namespace eosio {
                 : whitelisted(self)
                 , wu_contract(string_to_name(STR(WU_ACCOUNT)))
                 , wu_symbol(string_to_symbol(WU_DECIMALS, STR(WU_SYMBOL)))
-                , loyalty_contract(string_to_name(STR(LT_ACCOUNT)))
-                , clean(false) {}
-
-        ~exchange();
+                , loyalty_contract(string_to_name(STR(LT_ACCOUNT))) {}
 
         account_name wu_contract;
         symbol_type wu_symbol;
