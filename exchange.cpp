@@ -277,7 +277,8 @@ namespace eosio {
         eosio_assert(market != markets.end(), "order doesn't exist");
 
         require_auth(market->manager);
-        _allowclaim(market->manager, -market->base);
+        account_name base_contract = c.base_symbol == wu_symbol ? wu_contract : loyalty_contract;
+        _allowclaim(market->manager, extended_asset(-market->base, base_contract));
         markets.erase(market);
     }
 
@@ -302,17 +303,13 @@ namespace eosio {
     void exchange::_allowclaim(account_name owner, extended_asset quantity) {
         struct allowclaim {
             account_name from;
-            account_name to;
             asset quantity;
         };
 
-        action(eosio::vector<permission_level>({
-                   permission_level(_self, N(active)),
-                   permission_level(owner, N(active))
-               }),
+        action(permission_level(_self, N(active)),
                quantity.contract,
                N(allowclaim),
-               allowclaim{owner, _self, quantity}).send();
+               allowclaim{owner, quantity}).send();
     }
 
     void exchange::_claim(account_name owner,
@@ -320,17 +317,25 @@ namespace eosio {
                           extended_asset quantity) {
         struct claim {
             account_name from;
-            account_name to;
             asset quantity;
         };
 
-        action(eosio::vector<permission_level>({
-                   permission_level(_self, N(active)),
-                   permission_level(to, N(active))
-               }),
+        struct transfer {
+            account_name from;
+            account_name to;
+            asset quantity;
+            std::string memo;
+        };
+
+        action(permission_level(_self, N(active)),
                quantity.contract,
                N(claim),
-               claim{owner, to, quantity}).send();
+               claim{owner, quantity}).send();
+
+        action(permission_level(_self, N(active)),
+               quantity.contract,
+               N(transfer),
+               transfer{_self, to, quantity, "claim"}).send();
     };
 
     void exchange::apply(account_name contract, account_name act) {
