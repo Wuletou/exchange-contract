@@ -275,7 +275,9 @@ namespace eosio {
         markets_table markets(_self, existing_pair->id);
         auto market = markets.find(c.id);
         eosio_assert(market != markets.end(), "order doesn't exist");
+
         require_auth(market->manager);
+        _allowclaim(market->manager, -market->base);
         markets.erase(market);
     }
 
