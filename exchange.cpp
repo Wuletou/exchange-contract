@@ -197,12 +197,13 @@ namespace eosio {
         bool base_is_wu = base_symbol == wu_symbol;
         bool quote_is_wu = quote_symbol == wu_symbol;
         if (base_is_wu && !quote_is_wu) {
+            eosio_assert(lt_symbols.find(quote_symbol) != lt_symbols.end(), "There is no such loyalty token");
+
             base_deposit = extended_asset(c.base_deposit, wu_contract);
             quote_deposit = extended_asset(c.quote_deposit, loyalty_contract);
-
-            // check that loyalty token symbol exists
-            eosio_assert(lt_symbols.find(quote_symbol) != lt_symbols.end(), "There is no such loyalty token");
         } else if (!base_is_wu && quote_is_wu) {
+            eosio_assert(lt_symbols.find(base_symbol) != lt_symbols.end(), "There is no such loyalty token");
+
             base_deposit = extended_asset(c.base_deposit, loyalty_contract);
             quote_deposit = extended_asset(c.quote_deposit, wu_contract);
         } else {
