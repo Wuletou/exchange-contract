@@ -16,7 +16,8 @@ namespace eosio {
                 : whitelisted(self)
                 , wu_contract(string_to_name(STR(WU_ACCOUNT)))
                 , wu_symbol(string_to_symbol(WU_DECIMALS, STR(WU_SYMBOL)))
-                , loyalty_contract(string_to_name(STR(LT_ACCOUNT))) {}
+                , loyalty_contract(string_to_name(STR(LT_ACCOUNT)))
+                , lt_symbols(loyalty_contract, loyalty_contract) {}
 
         account_name wu_contract;
         symbol_type wu_symbol;
@@ -69,12 +70,17 @@ namespace eosio {
 
         void cleanstate();
     private:
+        struct symbols_t {
+            eosio::symbol_name symbol;
+            uint64_t primary_key() const { return symbol; }
+        };
+
+        multi_index<N(symbols), symbols_t> lt_symbols;
+
         void _allowclaim(account_name owner, extended_asset quantity);
 
         void _claim(account_name owner,
                     account_name to,
                     extended_asset quantity);
-
-        bool clean;
     };
 } // namespace eosio
