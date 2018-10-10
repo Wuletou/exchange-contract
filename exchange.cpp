@@ -112,8 +112,11 @@ namespace eosio {
                 eosio_assert(false, "incorrect state");
             }
 
+            print("market_trade.allowclaim: ", output);
             _allowclaim(t.seller, output);
+            print("market_trade.claim: ", name{order->manager}, ", ", name{t.seller}, ", ", min);
             _claim(order->manager, t.seller, min);
+            print("market_trade.claim: ", name{t.seller}, ", ", name{order->manager}, ", ", output);
             _claim(t.seller, order->manager, output);
 
             if (received == t.receive) break;
