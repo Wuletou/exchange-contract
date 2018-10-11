@@ -101,6 +101,10 @@ namespace eosio {
             extended_asset output = order->convert(min, extended_symbol(order->quote.symbol, quote_contract));
             sold += output;
 
+            _allowclaim(t.seller, output);
+            _claim(t.seller, order->manager, output);
+            _claim(order->manager, t.seller, min);
+
             if (min == order->base) {
                 order = sorted_markets.erase(order);
             } else if (min < order->base) {
@@ -111,10 +115,6 @@ namespace eosio {
             } else {
                 eosio_assert(false, "incorrect state");
             }
-
-            _allowclaim(t.seller, output);
-            _claim(t.seller, order->manager, output);
-            _claim(order->manager, t.seller, min);
 
             if (received == t.receive) break;
         }
@@ -162,6 +162,10 @@ namespace eosio {
             extended_asset output = order->convert(min, extended_symbol(order->base.symbol, base_contract));
             received += output;
 
+            _allowclaim(t.seller, min);
+            _claim(t.seller, order->manager, min);
+            _claim(order->manager, t.seller, output);
+
             if (min == order->quote) {
                 order = sorted_markets.erase(order);
             } else if (min < order->quote) {
@@ -172,10 +176,6 @@ namespace eosio {
             } else {
                 eosio_assert(false, "incorrect state");
             }
-
-            _allowclaim(t.seller, min);
-            _claim(t.seller, order->manager, min);
-            _claim(order->manager, t.seller, output);
 
             if (sold == t.sell) break;
         }
