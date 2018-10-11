@@ -10,14 +10,6 @@ namespace eosio {
         return a < b ? a : b;
     }
 
-    uint64_t pow10(uint64_t power) {
-        uint64_t result = 1;
-        for (uint64_t i = 0; i < power; i++) {
-            result *= 10;
-        }
-        return result;
-    }
-
     void exchange::on(const spec_trade &t) {
         require_auth(t.seller);
         eosio_assert(is_whitelisted(t.seller), "Account is not whitelisted");
