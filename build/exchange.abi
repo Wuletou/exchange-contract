@@ -67,7 +67,7 @@
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "asset"},
         {"name": "quote", "type": "asset"},
-        {"name": "price", "type": "float128"}
+        {"name": "price", "type": "float64"}
       ]
     },{
       "name": "whitelist",

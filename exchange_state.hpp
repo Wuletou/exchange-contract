@@ -22,15 +22,15 @@ namespace eosio {
         account_name manager;
         asset base;
         asset quote;
-        long double price;
+        double price;
 
         uint64_t primary_key() const { return id; }
 
         account_name get_manager() const { return manager; };
 
-        long double get_price() const { return price; }
+        double get_price() const { return price; }
 
-        long double get_rprice() const { return 1 / price; }
+        double get_rprice() const { return 1 / price; }
 
         extended_asset convert(extended_asset from, extended_symbol to_symbol) const;
 
@@ -40,7 +40,7 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<N(markets), exchange_state,
-            indexed_by<N(byprice), const_mem_fun < exchange_state, long double, &exchange_state::get_price> >
+            indexed_by<N(byprice), const_mem_fun < exchange_state, double, &exchange_state::get_price> >
     > markets_table;
 
 } /// namespace eosio
