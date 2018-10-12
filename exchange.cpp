@@ -163,9 +163,9 @@ namespace eosio {
             _claim(t.seller, order->manager, min);
             _claim(order->manager, t.seller, output);
 
-            if (output == order->base) {
+            if (min == quote) {
                 order = sorted_markets.erase(order);
-            } else if (output < order->base) {
+            } else if (min < quote) {
                 sorted_markets.modify(order, _self, [&](auto &s) {
                     s.base -= output;
                 });
