@@ -156,13 +156,16 @@ namespace eosio {
             extended_asset output = extended_asset(order->base, base_contract);
             received += output;
 
+            print("min: ", min, "\n");
+            print("output: ", output, "\n");
+
             _allowclaim(t.seller, min);
             _claim(t.seller, order->manager, min);
             _claim(order->manager, t.seller, output);
 
-            if (min == quote) {
+            if (output == order->base) {
                 order = sorted_markets.erase(order);
-            } else if (min < quote) {
+            } else if (output < order->base) {
                 sorted_markets.modify(order, _self, [&](auto &s) {
                     s.base -= output;
                 });
