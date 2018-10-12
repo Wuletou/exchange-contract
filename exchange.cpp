@@ -153,7 +153,14 @@ namespace eosio {
             auto quote = order->convert(extended_asset(order->base, base_contract), extended_symbol(order->quote_symbol, quote_contract));
             auto min = min_asset(extended_asset(quote, quote_contract), estimated_to_sold);
             sold += min;
-            extended_asset output = order->convert(min, extended_symbol(order->base.symbol, base_contract));
+
+            extended_asset output;
+            if (min == quote) {
+                output = extended_asset(order->base, base_contract);
+            } else {
+                output = convert(estimated_to_sold, extended_symbol(order->base.symbol, base_contract));
+            }
+//            extended_asset output = order->convert(min, extended_symbol(order->base.symbol, base_contract));
             received += output;
 
             print("min: ", min, "\n");
