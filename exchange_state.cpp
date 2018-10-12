@@ -21,7 +21,7 @@ namespace eosio {
             eosio_assert(false, "invalid conversion");
         }
 
-        return extended_asset(out * (pow10(to_symbol.precision()) / pow10(from.symbol.precision())), to_symbol);
+        return extended_asset(out * ((double) pow10(to_symbol.precision()) / pow10(from.symbol.precision())), to_symbol);
     }
 
     void exchange_state::print() const {
