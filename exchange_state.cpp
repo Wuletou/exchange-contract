@@ -11,7 +11,7 @@ namespace eosio {
     }
 
     extended_asset exchange_state::convert(extended_asset from, extended_symbol to_symbol) const {
-        uint64_t out;
+        double out;
 
         if (from.symbol == base.symbol && to_symbol == quote_symbol) {
             out = from.amount * get_price();
