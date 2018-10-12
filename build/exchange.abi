@@ -12,7 +12,7 @@
       "fields": [
         {"name":"id", "type":"uint64"},
         {"name":"seller", "type":"account_name"},
-        {"name":"sell", "type":"asset"},
+        {"name":"sell_symbol", "type":"symbol"},
         {"name":"receive", "type":"asset"},
       ]
     },
@@ -66,7 +66,7 @@
         {"name": "id", "type": "uint64"},
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "asset"},
-        {"name": "quote", "type": "asset"},
+        {"name": "quote_symbol", "type": "symbol"},
         {"name": "price", "type": "float64"}
       ]
     },{

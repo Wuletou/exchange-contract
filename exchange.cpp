@@ -13,11 +13,11 @@ namespace eosio {
     void exchange::on(const spec_trade &t) {
         require_auth(t.seller);
         eosio_assert(is_whitelisted(t.seller), "Account is not whitelisted");
-        eosio_assert(t.sell.is_valid(), "invalid sell amount");
+        eosio_assert(t.sell_symbol.is_valid(), "invalid sell amount");
         eosio_assert(t.receive.is_valid(), "invalid receive amount");
 
         auto base_symbol = t.receive.symbol;
-        auto quote_symbol = t.sell.symbol;
+        auto quote_symbol = t.sell_symbol;
         eosio_assert(base_symbol != quote_symbol, "invalid exchange");
 
         auto pairs = pairs_table(_self, _self);
@@ -30,13 +30,13 @@ namespace eosio {
         }
         eosio_assert(existing_pair != pairs.end(), "Pair doesn't exist");
 
-        extended_asset sell;
+        extended_symbol sell_symbol;
         extended_asset receive;
-        if (t.sell.symbol == wu_symbol) {
-            sell = extended_asset(t.sell, wu_contract);
+        if (t.sell_symbol == wu_symbol) {
+            sell_symbol = extended_symbol(t.sell_symbol, wu_contract);
             receive = extended_asset(t.receive, loyalty_contract);
         } else {
-            sell = extended_asset(t.sell, loyalty_contract);
+            sell_symbol = extended_symbol(t.sell_symbol, loyalty_contract);
             receive = extended_asset(t.receive, wu_contract);
         }
 
@@ -44,7 +44,9 @@ namespace eosio {
         auto existing = markets.find(t.id);
         eosio_assert(existing != markets.end(), "Order with the specified primary key doesn't exist");
         eosio_assert(existing->base == receive, "Base deposits must be the same");
-        eosio_assert(existing->quote == sell, "Base deposits must be the same");
+        eosio_assert(existing->quote_symbol == sell_symbol, "Base symbols must be the same");
+
+        extended_asset sell = existing->convert(receive, sell_symbol);
 
         markets.erase(existing);
 
@@ -83,14 +85,14 @@ namespace eosio {
 
         auto sorted_markets = markets.get_index<N(byprice)>();
         for (auto order = sorted_markets.begin(); order != sorted_markets.end(); ) {
-            if (order->manager == t.seller || order->quote.symbol != quote_symbol || order->base.symbol != base_symbol) {
+            if (order->manager == t.seller || order->quote_symbol != quote_symbol || order->base.symbol != base_symbol) {
                 order++;
                 continue;
             }
             extended_asset estimated_to_receive = extended_asset(t.receive - received, base_contract);
             auto min = min_asset(extended_asset(order->base, base_contract), estimated_to_receive);
             received += min;
-            extended_asset output = order->convert(min, extended_symbol(order->quote.symbol, quote_contract));
+            extended_asset output = order->convert(min, extended_symbol(order->quote_symbol, quote_contract));
             sold += output;
 
             _allowclaim(t.seller, output);
@@ -102,7 +104,6 @@ namespace eosio {
             } else if (min < order->base) {
                 sorted_markets.modify(order, _self, [&](auto &s) {
                     s.base -= min;
-                    s.quote -= output;
                 });
             } else {
                 eosio_assert(false, "incorrect state");
@@ -144,26 +145,26 @@ namespace eosio {
 
         auto sorted_markets = markets.get_index<N(byprice)>();
         for (auto order = sorted_markets.begin(); order != sorted_markets.end(); ) {
-            if (order->manager == t.seller || order->quote.symbol != quote_symbol || order->base.symbol != base_symbol) {
+            if (order->manager == t.seller || order->quote_symbol != quote_symbol || order->base.symbol != base_symbol) {
                 order++;
                 continue;
             }
             extended_asset estimated_to_sold = extended_asset(t.sell - sold, quote_contract);
-            auto min = min_asset(extended_asset(order->quote, quote_contract), estimated_to_sold);
+            auto quote = order->convert(extended_asset(order->base, base_contract), extended_symbol(order->quote_symbol, quote_contract));
+            auto min = min_asset(extended_asset(quote, quote_contract), estimated_to_sold);
             sold += min;
-            extended_asset output = order->convert(min, extended_symbol(order->base.symbol, base_contract));
+            extended_asset output = extended_asset(order->base, base_contract);
             received += output;
 
             _allowclaim(t.seller, min);
             _claim(t.seller, order->manager, min);
             _claim(order->manager, t.seller, output);
 
-            if (min == order->quote) {
+            if (min == quote) {
                 order = sorted_markets.erase(order);
-            } else if (min < order->quote) {
+            } else if (min < quote) {
                 sorted_markets.modify(order, _self, [&](auto &s) {
                     s.base -= output;
-                    s.quote -= min;
                 });
             } else {
                 eosio_assert(false, "incorrect state");
@@ -247,14 +248,13 @@ namespace eosio {
                 s.id = markets.available_primary_key();
                 s.manager = c.creator;
                 s.base = base_deposit;
-                s.quote = quote_deposit;
+                s.quote_symbol = quote_symbol;
                 s.price = price;
             });
         } else {
             print("combine trades with same rate\n");
             markets.modify(existing, _self, [&](auto &s) {
                 s.base += base_deposit;
-                s.quote += quote_deposit;
             });
         }
     }

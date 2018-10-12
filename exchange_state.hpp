@@ -21,7 +21,7 @@ namespace eosio {
         uint64_t id;
         account_name manager;
         asset base;
-        asset quote;
+        symbol_type quote_symbol;
         double price;
 
         uint64_t primary_key() const { return id; }
@@ -36,7 +36,7 @@ namespace eosio {
 
         void print() const;
 
-        EOSLIB_SERIALIZE(exchange_state, (id)(manager)(base)(quote)(price))
+        EOSLIB_SERIALIZE(exchange_state, (id)(manager)(base)(quote_symbol)(price))
     };
 
     typedef eosio::multi_index<N(markets), exchange_state,

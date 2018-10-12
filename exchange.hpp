@@ -26,7 +26,7 @@ namespace eosio {
         struct spec_trade {
             uint64_t id;
             account_name seller;
-            asset sell;
+            symbol_type sell_symbol;
             asset receive;
         };
 
