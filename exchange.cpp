@@ -158,7 +158,7 @@ namespace eosio {
             if (min == quote) {
                 output = extended_asset(order->base, base_contract);
             } else {
-                output = convert(estimated_to_sold, extended_symbol(order->base.symbol, base_contract));
+                output = order->convert(estimated_to_sold, extended_symbol(order->base.symbol, base_contract));
             }
 //            extended_asset output = order->convert(min, extended_symbol(order->base.symbol, base_contract));
             received += output;
