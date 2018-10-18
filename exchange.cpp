@@ -186,6 +186,24 @@ namespace eosio {
         eosio_assert(sold == t.sell, "unable to fill");
     }
 
+    void exchange::on(const trade &t) {
+        // get WU balance before trade
+        wu_balances balances(wu_contract, t.seller);
+        const auto& account = balances.find(wu_symbol.name());
+        eosio_assert(account != balances.end(), "symbol not found (trade 1)");
+        const asset balance_before = account->balance;
+
+        // first trade (A -> WU)
+        on(limit_trade{t.seller, t.sell, wu_symbol});
+
+        // get WU balance after first trade
+        const asset balance_after = account->balance;
+        const asset diff = balance_after - balance_before;
+
+        // second trade (Wu -> B)
+        on(limit_trade{t.seller, diff, t.receive_symbol});
+    }
+
     void exchange::on(const createx &c) {
         require_auth(c.creator);
 
@@ -368,6 +386,9 @@ namespace eosio {
                 return;
             case N(limit.trade):
                 on(unpack_action_data<limit_trade>());
+                return;
+            case N(trade):
+                on(unpack_action_data<trade>());
                 return;
             case N(cancelx):
                 on(unpack_action_data<cancelx>());

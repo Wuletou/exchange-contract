@@ -42,6 +42,12 @@ namespace eosio {
             symbol_type receive_symbol;
         };
 
+        struct trade {
+            account_name seller;
+            asset sell;
+            symbol_type receive_symbol;
+        };
+
         struct cancelx {
             uint64_t id;
             symbol_type base_symbol;
@@ -62,6 +68,8 @@ namespace eosio {
 
         void on(const limit_trade &t);
 
+        void on(const trade &t);
+
         void on(const cancelx &c);
 
         void apply(account_name contract, account_name act);
@@ -75,7 +83,15 @@ namespace eosio {
             uint64_t primary_key() const { return symbol; }
         };
 
+        struct account {
+            eosio::asset balance;
+            int64_t blocked;
+            uint64_t primary_key() const { return balance.symbol.name(); }
+        };
+
         multi_index<N(symbols), symbols_t> lt_symbols;
+
+        typedef eosio::multi_index<N(accounts), account> wu_balances;
 
         void _allowclaim(account_name owner, extended_asset quantity);
 

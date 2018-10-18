@@ -35,6 +35,15 @@
         ]
       },
     {
+      "name": "trade",
+      "base": "",
+      "fields": [
+        {"name":"seller", "type":"account_name"},
+        {"name":"sell", "type":"asset"},
+        {"name":"receive_symbol", "type":"symbol"},
+      ]
+    },
+    {
       "name": "createx",
       "base": "",
       "fields": [
@@ -109,6 +118,7 @@
     { "name": "spec.trade", "type": "spec_trade", "ricardian_contract": "" },
     { "name": "market.trade", "type": "market_trade", "ricardian_contract": "" },
     { "name": "limit.trade", "type": "limit_trade", "ricardian_contract": "" },
+    { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
     { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
     { "name": "white", "type": "white", "ricardian_contract": "" },
