@@ -3,6 +3,7 @@
 #include "whitelisted.cpp"
 
 #include <eosiolib/dispatcher.hpp>
+#include <string>
 
 namespace eosio {
 
@@ -139,7 +140,7 @@ namespace eosio {
         account_name quote_contract = quote_symbol == wu_symbol ? wu_contract : loyalty_contract;
 
         markets_table markets(_self, existing_pair->id);
-        eosio_assert(t.sell.amount > 0, "sell amount must be positive");
+        eosio_assert(t.sell.amount > 0, ("sell amount must be positive" + std::to_string(t.sell.amount)).c_str());
         auto sold = asset(0, quote_symbol);
         auto received = asset(0, base_symbol);
 
@@ -188,20 +189,28 @@ namespace eosio {
 
     void exchange::on(const trade &t) {
         // get WU balance before trade
-        wu_balances balances(wu_contract, t.seller);
-        const auto& account = balances.find(wu_symbol.name());
-        eosio_assert(account != balances.end(), "symbol not found (trade 1)");
-        const asset balance_before = account->balance;
+        auto pairs = pairs_table(_self, _self);
+        auto existing_pair = pairs.end();
+        for (auto pair = pairs.begin(); pair != pairs.end(); pair++) {
+            if (pair->base_symbol == t.receive_symbol && pair->quote_symbol == t.sell.symbol) {
+                existing_pair = pair;
+                break;
+            }
+        }
+        eosio_assert(existing_pair != pairs.end(), "Pair doesn't exist");
+        auto markets = markets_table(_self, existing_pair->id);
+        auto sorted_markets = markets.get_index<N(byprice)>();
+        auto order = sorted_markets.begin();
+        eosio_assert(order != sorted_markets.end(), "Markets doesn't exist");
 
-        // first trade (A -> WU)
+        auto wu_amount = order->convert(extended_asset(t.sell, loyalty_contract), extended_symbol(wu_symbol, wu_contract));
+        print("wu amount: ", wu_amount, '\n');
+
+        print("trade 1\n");
         on(limit_trade{t.seller, t.sell, wu_symbol});
 
-        // get WU balance after first trade
-        const asset balance_after = account->balance;
-        const asset diff = balance_after - balance_before;
-
-        // second trade (Wu -> B)
-        on(limit_trade{t.seller, diff, t.receive_symbol});
+        print("trade 2\n");
+        on(limit_trade{t.seller, wu_amount, t.receive_symbol});
     }
 
     void exchange::on(const createx &c) {
