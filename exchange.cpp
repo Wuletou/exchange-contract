@@ -192,7 +192,7 @@ namespace eosio {
         auto pairs = pairs_table(_self, _self);
         auto existing_pair = pairs.end();
         for (auto pair = pairs.begin(); pair != pairs.end(); pair++) {
-            if (pair->base_symbol == t.receive_symbol && pair->quote_symbol == t.sell.symbol) {
+            if (pair->base_symbol == wu_symbol && pair->quote_symbol == t.sell.symbol) {
                 existing_pair = pair;
                 break;
             }
