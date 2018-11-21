@@ -12,7 +12,7 @@
       "fields": [
         {"name":"id", "type":"uint64"},
         {"name":"seller", "type":"account_name"},
-        {"name":"sell", "type":"asset"},
+        {"name":"sell_symbol", "type":"symbol"},
         {"name":"receive", "type":"asset"},
       ]
     },
@@ -34,6 +34,15 @@
           {"name":"receive_symbol", "type":"symbol"},
         ]
       },
+    {
+      "name": "trade",
+      "base": "",
+      "fields": [
+        {"name":"seller", "type":"account_name"},
+        {"name":"sell", "type":"asset"},
+        {"name":"receive_symbol", "type":"symbol"},
+      ]
+    },
     {
       "name": "createx",
       "base": "",
@@ -66,7 +75,7 @@
         {"name": "id", "type": "uint64"},
         {"name": "manager", "type": "name"},
         {"name": "base", "type": "asset"},
-        {"name": "quote", "type": "asset"},
+        {"name": "quote_symbol", "type": "symbol"},
         {"name": "price", "type": "float64"}
       ]
     },{
@@ -99,18 +108,24 @@
       "fields": [
         {"name": "accounts", "type": "name[]"}
       ]
+    },,{
+      "name": "cleanstate",
+      "base": "",
+      "fields": []
     }
   ],
   "actions": [
     { "name": "spec.trade", "type": "spec_trade", "ricardian_contract": "" },
     { "name": "market.trade", "type": "market_trade", "ricardian_contract": "" },
     { "name": "limit.trade", "type": "limit_trade", "ricardian_contract": "" },
+    { "name": "trade", "type": "trade", "ricardian_contract": "" },
     { "name": "createx", "type": "createx", "ricardian_contract": "" },
     { "name": "cancelx", "type": "cancelx", "ricardian_contract": "" },
     { "name": "white", "type": "white", "ricardian_contract": "" },
     { "name": "unwhite", "type": "unwhite", "ricardian_contract": "" },
     { "name": "whitemany", "type": "whitemany", "ricardian_contract": "" },
-    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" }
+    { "name": "unwhitemany", "type": "unwhitemany", "ricardian_contract": "" },
+    { "name": "cleanstate", "type": "cleanstate", "ricardian_contract": "" }
   ],
   "tables": [{
       "name": "pairs",

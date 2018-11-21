@@ -16,7 +16,8 @@ namespace eosio {
                 : whitelisted(self)
                 , wu_contract(string_to_name(STR(WU_ACCOUNT)))
                 , wu_symbol(string_to_symbol(WU_DECIMALS, STR(WU_SYMBOL)))
-                , loyalty_contract(string_to_name(STR(LT_ACCOUNT))) {}
+                , loyalty_contract(string_to_name(STR(LT_ACCOUNT)))
+                , lt_symbols(loyalty_contract, loyalty_contract) {}
 
         account_name wu_contract;
         symbol_type wu_symbol;
@@ -25,7 +26,7 @@ namespace eosio {
         struct spec_trade {
             uint64_t id;
             account_name seller;
-            asset sell;
+            symbol_type sell_symbol;
             asset receive;
         };
 
@@ -36,6 +37,12 @@ namespace eosio {
         };
 
         struct limit_trade {
+            account_name seller;
+            asset sell;
+            symbol_type receive_symbol;
+        };
+
+        struct trade {
             account_name seller;
             asset sell;
             symbol_type receive_symbol;
@@ -61,13 +68,31 @@ namespace eosio {
 
         void on(const limit_trade &t);
 
+        void on(const trade &t);
+
         void on(const cancelx &c);
 
         void apply(account_name contract, account_name act);
 
         extended_asset convert(extended_asset from, extended_symbol to) const;
 
+        void cleanstate();
     private:
+        struct symbols_t {
+            eosio::symbol_name symbol;
+            uint64_t primary_key() const { return symbol; }
+        };
+
+        struct account {
+            eosio::asset balance;
+            int64_t blocked;
+            uint64_t primary_key() const { return balance.symbol.name(); }
+        };
+
+        multi_index<N(symbols), symbols_t> lt_symbols;
+
+        typedef eosio::multi_index<N(accounts), account> wu_balances;
+
         void _allowclaim(account_name owner, extended_asset quantity);
 
         void _claim(account_name owner,
